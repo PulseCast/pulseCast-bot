@@ -1,21 +1,23 @@
 export const welcomeMessageMarkup = async (userName: string) => {
   return {
-    message: `Hey @${userName} 👋\n\nWelcome to <b>Syntra</b> — your all-in-one wallet alert tracker and copy trading bot!\n\n🔍 Track wallets and get real-time alerts when they buy or sell tokens.\n🤖 Enable auto-trading to copy their every move — buy what they buy, sell when they sell.\n\nStart by typing pasting a token address to get onchain analysis or /track &lt;wallet address&gt; to track a wallet address. Let’s trade smarter 🚀\n\n<b>Powered by <a href="https://vybe.fyi/?tab=trending-tokens">Vybe API</a> ⚡️</b>`,
+    message: `Hey @${userName} 👋\n\nWelcome to <b>PulseCast</b> — your social prediction bot!\n\n🎯 🎯 Make predictions with your friends on real-world events.\n💰 Create a private prediction pot, invite others, and see who’s right.\n🧾 All results are verified from public, trustworthy data sources.\n\n⚠️<b>PulseCast Disclaimer</b>\nPredictions made here may involve risk, and outcomes depend on publicly verifiable data sources.\nBy continuing, you acknowledge that:\n  ☞You understand prediction outcomes can go either way.\n  ☞You accept full responsibility for any losses or results.\n  ☞You are participating voluntarily.`,
     keyboard: [
       [
         {
-          text: 'Get started 🚀',
+          text: '✅ I Understand',
           callback_data: JSON.stringify({
-            command: `/menu`,
+            command: `/acceptDisclaimer`,
           }),
         },
       ],
-      [
-        {
-          text: '➕ Add to Group',
-          url: `${process.env.BOT_URL}?startgroup=true`,
-        },
-      ],
+      // [
+      //   {
+      //     text: '➕ Add to Group',
+      //     url: `${process.env.BOT_URL}?startgroup=true`,
+      //   },
+      // ],
     ],
   };
 };
+
+// Get started 🚀

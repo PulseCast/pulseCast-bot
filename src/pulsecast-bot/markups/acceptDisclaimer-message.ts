@@ -9,12 +9,18 @@ export const acceptDisclaimerMessageMarkup = async () => {
             command: `/createPot`,
           }),
         },
-      ],
-      [
         {
           text: '💰 Join Pot',
           callback_data: JSON.stringify({
             command: `/joinPot`,
+          }),
+        },
+      ],
+      [
+        {
+          text: '📂 Categories',
+          callback_data: JSON.stringify({
+            command: `/categories`,
           }),
         },
       ],

@@ -3,7 +3,7 @@ import * as mongoose from 'mongoose';
 
 export type UserDocument = mongoose.HydratedDocument<User>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
   @Prop({ unique: true })
   chatId: number;
@@ -16,6 +16,12 @@ export class User {
 
   @Prop()
   svmWalletDetails: string;
+
+  @Prop({ default: 0 })
+  totalWinningsMicros: number;
+
+  @Prop({ default: 0 })
+  totalLossesMicros: number;
 
   @Prop()
   referralCode: string;

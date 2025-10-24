@@ -79,6 +79,7 @@ export class PulsecastBotService {
       switch (command) {
         case '/acceptDisclaimer':
           await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+
           //TODO: MAKE USER ACCEPTDISCLAIMER AS TRUE
           const allFeatures = await acceptDisclaimerMessageMarkup();
           if (allFeatures) {
@@ -111,4 +112,29 @@ export class PulsecastBotService {
       console.log(error);
     }
   };
+
+  getKeyboard(page = 0) {
+    // List of buttons
+    const buttons = [
+      'Button 1',
+      'Button 2',
+      'Button 3',
+      'Button 4',
+      'Button 5',
+    ];
+    const pageSize = 2;
+    const start = page * pageSize;
+    const pageButtons = buttons
+      .slice(start, start + pageSize)
+      .map((text) => [{ text, callback_data: text }]);
+
+    // Add navigation
+    const nav = [];
+    if (page > 0) nav.push({ text: '⬅️ Prev', callback_data: 'prev' });
+    if ((page + 1) * pageSize < buttons.length)
+      nav.push({ text: 'Next ➡️', callback_data: 'next' });
+    if (nav.length) pageButtons.push(nav);
+
+    return { inline_keyboard: pageButtons };
+  }
 }

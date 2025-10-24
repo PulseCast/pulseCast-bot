@@ -1,15 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as TelegramBot from 'node-telegram-bot-api';
 import { HttpService } from '@nestjs/axios';
+import { acceptDisclaimerMessageMarkup, welcomeMessageMarkup } from './markups';
 
-const token = process.env.TELEGRAM_TOKEN;
 @Injectable()
 export class PulsecastBotService {
   private readonly pulseBot: TelegramBot;
   private logger = new Logger(PulsecastBotService.name);
+  private token = process.env.TELEGRAM_TOKEN;
 
   constructor(private readonly httpService: HttpService) {
-    this.pulseBot = new TelegramBot(token, { polling: true });
+    this.pulseBot = new TelegramBot(this.token, { polling: true });
     this.pulseBot.on('message', this.handleRecievedMessages);
     this.pulseBot.on('callback_query', this.handleButtonCommands);
   }
@@ -17,6 +18,33 @@ export class PulsecastBotService {
   handleRecievedMessages = async (msg: any) => {
     this.logger.debug(msg);
     try {
+      if (!msg.text) {
+        return;
+      }
+
+      console.log(msg.text);
+      const command = msg.text.trim();
+
+      if (command === '/start' && msg.chat.type === 'private') {
+        const username = `${msg.from.username}`;
+
+        const welcome = await welcomeMessageMarkup(username);
+        const replyMarkup = { inline_keyboard: welcome.keyboard };
+
+        if (welcome) {
+          await this.pulseBot.sendChatAction(msg.chat.id, 'typing');
+
+          await this.pulseBot.sendMessage(msg.chat.id, welcome.message, {
+            parse_mode: 'HTML',
+            reply_markup: replyMarkup,
+          });
+        } else {
+          await this.pulseBot.sendMessage(
+            msg.chat.id,
+            'There was an error saving your data, Please click the button below to try again.\n\nclick on /start',
+          );
+        }
+      }
     } catch (error) {
       console.error(error);
     }
@@ -24,6 +52,11 @@ export class PulsecastBotService {
 
   handleButtonCommands = async (query: any) => {
     this.logger.debug(query);
+    let command: string;
+    // let parsedData;
+
+    const chatId = query.message.chat.id;
+    // const messageId = query.message.message_id;
 
     function isJSON(str) {
       try {
@@ -36,10 +69,46 @@ export class PulsecastBotService {
     }
 
     if (isJSON(query.data)) {
-      try {
-      } catch (error) {
-        console.log(error);
+      command = JSON.parse(query.data).command;
+      //   userChatId = JSON.parse(query.data).userChatId;
+    } else {
+      command = query.data;
+    }
+
+    try {
+      switch (command) {
+        case '/acceptDisclaimer':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          //TODO: MAKE USER ACCEPTDISCLAIMER AS TRUE
+          const allFeatures = await acceptDisclaimerMessageMarkup();
+          if (allFeatures) {
+            const replyMarkup = { inline_keyboard: allFeatures.keyboard };
+            return await this.pulseBot.sendMessage(
+              chatId,
+              allFeatures.message,
+              {
+                parse_mode: 'HTML',
+                reply_markup: replyMarkup,
+              },
+            );
+          }
+          return;
+
+        case '/close':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          return await this.pulseBot.deleteMessage(
+            query.message.chat.id,
+            query.message.message_id,
+          );
+
+        default:
+          return await this.pulseBot.sendMessage(
+            query.message.chat.id,
+            `Processing command failed, please try again`,
+          );
       }
+    } catch (error) {
+      console.log(error);
     }
   };
 }

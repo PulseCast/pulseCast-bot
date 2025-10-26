@@ -113,3 +113,22 @@ Resolution: Verified Source
 Join using /joinpot_abc123
 
 cloneEventFromPolymarket() (the backend logic that takes a public mirrored event and turns it into a private group pot)?
+
+👋 Welcome to BetVerse!
+
+Choose what you want to explore:
+🔥 Trending Events
+⏳ Upcoming Events
+📂 Categories
+🎯 Search Event
+
+{
+"matchId": "CHE-ARS-2025-10-26",
+"marketType": "1X2",
+"outcomes": {
+"1": { "label": "Chelsea", "prob": 0.34 },
+"X": { "label": "Draw", "prob": 0.31 },
+"2": { "label": "Arsenal", "prob": 0.35 }
+},
+"status": "pre-match"
+}

@@ -1,15 +1,20 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import * as TelegramBot from 'node-telegram-bot-api';
 import { HttpService } from '@nestjs/axios';
 import { acceptDisclaimerMessageMarkup, welcomeMessageMarkup } from './markups';
+import { MarkupService } from './markup.service';
 
 @Injectable()
 export class PulsecastBotService {
-  private readonly pulseBot: TelegramBot;
+  readonly pulseBot: TelegramBot;
   private logger = new Logger(PulsecastBotService.name);
   private token = process.env.TELEGRAM_TOKEN;
 
-  constructor(private readonly httpService: HttpService) {
+  constructor(
+    private readonly httpService: HttpService,
+    @Inject(forwardRef(() => MarkupService))
+    private readonly markupService: MarkupService,
+  ) {
     this.pulseBot = new TelegramBot(this.token, { polling: true });
     this.pulseBot.on('message', this.handleRecievedMessages);
     this.pulseBot.on('callback_query', this.handleButtonCommands);
@@ -53,6 +58,9 @@ export class PulsecastBotService {
   handleButtonCommands = async (query: any) => {
     this.logger.debug(query);
     let command: string;
+    let action: string;
+    // let slug: string;
+
     // let parsedData;
 
     const chatId = query.message.chat.id;
@@ -68,9 +76,16 @@ export class PulsecastBotService {
       }
     }
 
+    // function to split country from language
+    function splitword(word) {
+      return word.split('_');
+    }
+
     if (isJSON(query.data)) {
       command = JSON.parse(query.data).command;
       //   userChatId = JSON.parse(query.data).userChatId;
+      action = JSON.parse(query.data).action;
+      //   slug = JSON.parse(query.data).slug;
     } else {
       command = query.data;
     }
@@ -92,6 +107,46 @@ export class PulsecastBotService {
                 reply_markup: replyMarkup,
               },
             );
+          }
+          return;
+
+        case '/categories':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          await this.markupService.displayMarketCateories(chatId);
+          return;
+
+        case '/nextCatePage':
+          //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          if (action) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const [btnPage, identify] = splitword(action);
+            const changeDisplay = {
+              buttonPage: btnPage,
+              messageId: query.message.message_id,
+            };
+            await this.markupService.displayMarketCateories(
+              query.message.chat.id,
+              changeDisplay,
+            );
+            return;
+          }
+          return;
+
+        case '/prevCatePage':
+          //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          if (action) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const [btnPage, identify] = splitword(action);
+            const changeDisplay = {
+              buttonPage: btnPage,
+              messageId: query.message.message_id,
+            };
+
+            await this.markupService.displayMarketCateories(
+              query.message.chat.id,
+              changeDisplay,
+            );
+            return;
           }
           return;
 

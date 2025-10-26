@@ -7,6 +7,7 @@ export class EventController {
 
   @Get()
   getCategory() {
-    return this.eventService.getCategories();
+    // return this.eventService.getCategories();
+    return this.eventService.getLeagues();
   }
 }

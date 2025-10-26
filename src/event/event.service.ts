@@ -136,4 +136,32 @@ export class EventService {
       );
     }
   }
+
+  async getLeagues(): Promise<{ id: string; name: string }[]> {
+    const cached = this.cache.get<{ id: string; name: string }[]>('leagues');
+    if (cached) {
+      console.log('✅ leagues fetched from cache');
+      console.log(cached.length);
+      return cached;
+    }
+
+    try {
+      const { data } = await firstValueFrom(
+        this.httpService.get(`${process.env.BET_LEAGUE}`),
+      );
+
+      this.cache.set('leagues', data.result, 18000); // 5 hours
+      console.log('✅ leagues fetched from Polymarket');
+      console.log(data.result.length);
+      return data.result;
+    } catch (error: any) {
+      console.error('❌ Error fetching leagues:', error.message);
+      const fallback =
+        this.cache.get<{ id: string; name: string }[]>('leagues');
+      if (fallback) return fallback;
+      throw new Error(
+        'Failed to fetch leagues and no cached version available',
+      );
+    }
+  }
 }

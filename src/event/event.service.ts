@@ -164,4 +164,43 @@ export class EventService {
       );
     }
   }
+
+  async getLeagues1(): Promise<{ id: string; name: string }[]> {
+    const cached = this.cache.get<{ id: string; name: string }[]>('leagues1');
+    if (cached) {
+      console.log('✅ leagues fetched from cache');
+      console.log(cached.length);
+      return cached;
+    }
+
+    try {
+      const { data } = await firstValueFrom(
+        this.httpService.get(`${process.env.BET_LEAGUE1}`),
+      );
+
+      // Ensure data.result exists and filter only soccer leagues
+      const soccerLeagues = (data || []).filter(
+        (league: any) => league.group === 'Soccer',
+      );
+
+      this.cache.set('leagues1', soccerLeagues, 18000); // 5 hours
+      console.log('✅ leagues fetched from API (Soccer only)');
+      console.log(soccerLeagues.length);
+
+      return soccerLeagues;
+    } catch (error: any) {
+      console.error('❌ Error fetching leagues:', error.message);
+
+      const fallback =
+        this.cache.get<{ id: string; name: string }[]>('leagues1');
+      if (fallback) {
+        console.log('⚠️ Using fallback cache data');
+        return fallback;
+      }
+
+      throw new Error(
+        'Failed to fetch leagues and no cached version available',
+      );
+    }
+  }
 }

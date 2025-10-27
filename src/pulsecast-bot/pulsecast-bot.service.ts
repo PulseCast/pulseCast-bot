@@ -112,7 +112,7 @@ export class PulsecastBotService {
 
         case '/categories':
           await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
-          await this.markupService.displayMarketCateories(chatId);
+          await this.markupService.displayLeagues(chatId);
           return;
 
         case '/nextCatePage':
@@ -124,7 +124,7 @@ export class PulsecastBotService {
               buttonPage: btnPage,
               messageId: query.message.message_id,
             };
-            await this.markupService.displayMarketCateories(
+            await this.markupService.displayLeagues(
               query.message.chat.id,
               changeDisplay,
             );
@@ -142,7 +142,7 @@ export class PulsecastBotService {
               messageId: query.message.message_id,
             };
 
-            await this.markupService.displayMarketCateories(
+            await this.markupService.displayLeagues(
               query.message.chat.id,
               changeDisplay,
             );

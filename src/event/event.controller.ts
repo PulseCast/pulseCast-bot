@@ -8,6 +8,6 @@ export class EventController {
   @Get()
   getCategory() {
     // return this.eventService.getCategories();
-    return this.eventService.getLeagues();
+    return this.eventService.getLeagues1();
   }
 }

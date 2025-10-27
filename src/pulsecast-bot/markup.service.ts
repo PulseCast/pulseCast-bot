@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { PulsecastBotService } from './pulsecast-bot.service';
-import { marketCategories } from './markups';
+import { leagues } from './markups';
 
 @Injectable()
 export class MarkupService {
@@ -38,7 +38,7 @@ export class MarkupService {
   //     return { inline_keyboard: pageButtons };
   //   }
 
-  displayMarketCateories = async (chatId: string, changeDisplay?) => {
+  displayLeagues = async (chatId: string, changeDisplay?) => {
     let displayPage;
     console.log(changeDisplay);
     let messageId;
@@ -50,20 +50,16 @@ export class MarkupService {
     }
     try {
       console.log('message needs to be edited');
-      const selectCategory = marketCategories[displayPage];
+      const selectCategory = leagues[displayPage];
 
       const selectCategoryMarkup = {
         inline_keyboard: selectCategory,
       };
 
       if (!messageId) {
-        await this.pulseBotService.pulseBot.sendMessage(
-          chatId,
-          'Market Categories',
-          {
-            reply_markup: selectCategoryMarkup,
-          },
-        );
+        await this.pulseBotService.pulseBot.sendMessage(chatId, 'Leagues', {
+          reply_markup: selectCategoryMarkup,
+        });
         return;
       } else {
         console.log('message needs to be edited');

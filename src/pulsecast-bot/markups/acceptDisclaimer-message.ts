@@ -18,17 +18,29 @@ export const acceptDisclaimerMessageMarkup = async () => {
       ],
       [
         {
-          text: '📂 Categories',
+          text: '⚽ Leagues',
           callback_data: JSON.stringify({
-            command: `/categories`,
+            command: `/leagues`,
           }),
         },
       ],
       [
         {
-          text: '🔥 Trending Events ',
+          text: '🗓 Today’s Fixtures',
           callback_data: JSON.stringify({
-            command: `/trendingEvents`,
+            command: `/todaysFixtures`,
+          }),
+        },
+        {
+          text: '🔥 Live Now',
+          callback_data: JSON.stringify({
+            command: `/liveMatches`,
+          }),
+        },
+        {
+          text: '⏭ Upcoming Fixtures',
+          callback_data: JSON.stringify({
+            command: `/nextFixtures`,
           }),
         },
       ],

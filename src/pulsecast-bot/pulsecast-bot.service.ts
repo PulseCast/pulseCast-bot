@@ -110,12 +110,12 @@ export class PulsecastBotService {
           }
           return;
 
-        case '/categories':
+        case '/leagues':
           await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
           await this.markupService.displayLeagues(chatId);
           return;
 
-        case '/nextCatePage':
+        case '/nextLeaguePage':
           //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
           if (action) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -132,7 +132,7 @@ export class PulsecastBotService {
           }
           return;
 
-        case '/prevCatePage':
+        case '/prevLeaguePage':
           //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
           if (action) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars

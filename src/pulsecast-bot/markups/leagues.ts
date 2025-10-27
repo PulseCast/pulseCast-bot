@@ -15,6 +15,8 @@ export const leagues = {
           id: '3',
         }),
       },
+    ],
+    [
       {
         text: 'La Liga - Spain',
         callback_data: JSON.stringify({
@@ -22,165 +24,75 @@ export const leagues = {
           id: '302',
         }),
       },
-    ],
-    [
       {
         text: 'Serie A - Italy',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'basketball',
-        }),
-      },
-      {
-        text: 'Cricket',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'cricket',
-        }),
-      },
-      {
-        text: 'Tennis',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'tennis',
+          id: '207',
         }),
       },
     ],
     [
       {
-        text: 'Boxing/MMA',
+        text: 'Bundesliga - Germany',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'boxing-mma',
+          id: '175',
         }),
       },
       {
-        text: 'Biking',
+        text: 'Ligue 1 - France',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'biking',
-        }),
-      },
-      {
-        text: 'Golf',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'golf',
+          id: '168',
         }),
       },
     ],
     [
       {
-        text: 'Esports',
+        text: 'UEFA Europa League',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'esports',
+          id: '4',
         }),
       },
       {
-        text: 'Racing',
+        text: 'EFL Championship',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'racing',
-        }),
-      },
-      {
-        text: 'Baseball',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'baseball',
+          id: '153',
         }),
       },
     ],
     [
       {
-        text: 'Olympics',
+        text: 'Brazil Série A',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'olympics',
+          id: '99',
         }),
       },
       {
-        text: 'Hockey',
+        text: 'CONMEBOL Libertadores',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'hockey',
-        }),
-      },
-      {
-        text: 'Chess',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'chess',
+          id: '18',
         }),
       },
     ],
     [
       {
-        text: 'Poker',
+        text: 'MLS - USA',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'poker',
+          id: '332',
         }),
       },
       {
-        text: 'Pop Culture',
+        text: 'Eredivisie - Netherlands',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'pop-culture',
-        }),
-      },
-      {
-        text: 'Art',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'art',
-        }),
-      },
-    ],
-    [
-      {
-        text: 'Celebrities',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'celebrities',
-        }),
-      },
-      {
-        text: 'Film & TV',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'film-and-tv',
-        }),
-      },
-      {
-        text: 'Twitter',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'twitter',
-        }),
-      },
-    ],
-    [
-      {
-        text: 'Music',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'music',
-        }),
-      },
-      {
-        text: 'Crypto',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'crypto',
-        }),
-      },
-      {
-        text: 'Prices',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'prices',
+          id: '244',
         }),
       },
     ],
@@ -194,194 +106,107 @@ export const leagues = {
       {
         text: ' > ',
         callback_data: JSON.stringify({
-          command: '/nextCatePage',
-          action: 'secondDisplay_cat',
+          command: '/nextLeaguePage',
+          action: 'secondDisplay_leagues',
         }),
       },
     ],
   ],
+
   secondDisplay: [
     [
       {
-        text: 'Airdrops',
+        text: 'Primeira Liga - Portugal',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'airdrops',
+          id: '266',
         }),
       },
       {
-        text: 'Stablecoins',
+        text: 'Turkish Süper Lig',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'stablecoins',
-        }),
-      },
-      {
-        text: 'Friend Tech',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'friend-tech',
+          id: '322',
         }),
       },
     ],
     [
       {
-        text: 'Market caps',
+        text: 'Greek Super League',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'market-caps',
+          id: '178',
         }),
       },
       {
-        text: 'Exploits',
+        text: 'Argentine Primera División',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'exploits',
-        }),
-      },
-      {
-        text: 'Exchanges',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'exchanges',
+          id: '43',
         }),
       },
     ],
     [
       {
-        text: 'Politics',
+        text: 'Chilean Primera División',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'politics',
+          id: '115',
         }),
       },
       {
-        text: 'Polls',
+        text: 'CONMEBOL Sudamericana',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'polls',
-        }),
-      },
-      {
-        text: 'Bills & Legislation',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'bills-and-legislation',
+          id: '385',
         }),
       },
     ],
     [
       {
-        text: 'Trump',
+        text: 'Norwegian Eliteserien',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'trump',
+          id: '253',
         }),
       },
       {
-        text: 'Elections',
+        text: 'Swiss Superleague',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'elections',
-        }),
-      },
-      {
-        text: 'Courts',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'courts',
+          id: '308',
         }),
       },
     ],
     [
       {
-        text: 'Biden',
+        text: 'Austrian Bundesliga',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'biden',
+          id: '56',
         }),
       },
       {
-        text: 'US politics',
+        text: 'Allsvenskan - Sweden',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'us-politics',
-        }),
-      },
-      {
-        text: 'Middle East',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'middle-east',
+          id: '307',
         }),
       },
     ],
     [
       {
-        text: 'Oil',
+        text: 'Belgium First Div',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'oil',
+          id: '63',
         }),
       },
       {
-        text: 'Business',
+        text: 'Danish Superliga',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'business',
-        }),
-      },
-      {
-        text: 'Travel',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'travel',
-        }),
-      },
-    ],
-    [
-      {
-        text: 'Inflation',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'inflation',
-        }),
-      },
-      {
-        text: 'Fed interest rates',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'fed-interest-rates',
-        }),
-      },
-      {
-        text: 'Commodity prices',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'commodity-prices',
-        }),
-      },
-    ],
-    [
-      {
-        text: 'Forex',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'forex',
-        }),
-      },
-      {
-        text: 'Unemployment',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'unemployment',
-        }),
-      },
-      {
-        text: 'Tech',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'tech',
+          id: '135',
         }),
       },
     ],
@@ -389,125 +214,107 @@ export const leagues = {
       {
         text: '<',
         callback_data: JSON.stringify({
-          command: '/prevCatePage',
-          action: 'firstDisplay_cat',
+          command: '/prevLeaguePage',
+          action: 'firstDisplay_leagues',
         }),
       },
       {
         text: ' > ',
         callback_data: JSON.stringify({
-          command: '/nextCatePage',
-          action: 'thirdDisplay_cat',
+          command: '/nextLeaguePage',
+          action: 'thirdDisplay_leagues',
         }),
       },
     ],
   ],
+
   thirdDisplay: [
     [
       {
-        text: 'Billionaires',
+        text: 'Russian Premier League',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'billionaires',
+          id: '344',
         }),
       },
       {
-        text: 'Finance',
+        text: 'Scottish Cup',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'finance',
-        }),
-      },
-      {
-        text: 'Coronavirus',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'coronavirus',
+          id: '280',
         }),
       },
     ],
     [
       {
-        text: 'Cases',
+        text: 'Polish Ekstraklasa',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'cases',
+          id: '259',
         }),
       },
       {
-        text: 'Vaccinations',
+        text: 'Finnish Veikkausliiga',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'vaccinations',
-        }),
-      },
-      {
-        text: 'Variants',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'variants',
+          id: '352',
         }),
       },
     ],
     [
       {
-        text: 'NFTs',
+        text: 'K League 1 - Korea',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'nfts',
+          id: '219',
         }),
       },
       {
-        text: 'Floor prices',
+        text: 'Liga MX - Mexico',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'floor-prices',
-        }),
-      },
-      {
-        text: 'AI',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'ai',
+          id: '634',
         }),
       },
     ],
     [
       {
-        text: 'Chat Bots',
+        text: 'J1 League - Japan',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'chat-bots',
+          id: '209',
         }),
       },
       {
-        text: 'Science',
+        text: 'Chinese Super League',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'science',
-        }),
-      },
-      {
-        text: 'Academia',
-        callback_data: JSON.stringify({
-          command: '/leagueSelected',
-          id: 'academia',
+          id: '118',
         }),
       },
     ],
     [
       {
-        text: 'Climate & Weather',
+        text: 'A-League - Australia',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'climate-and-weather',
+          id: '',
         }),
       },
       {
-        text: 'Space',
+        text: 'Saudi Pro League',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
-          id: 'space',
+          id: '278',
+        }),
+      },
+    ],
+    [
+      {
+        text: 'PSL -South African',
+        callback_data: JSON.stringify({
+          command: '/leagueSelected',
+          id: '297',
         }),
       },
     ],
@@ -515,8 +322,8 @@ export const leagues = {
       {
         text: '<',
         callback_data: JSON.stringify({
-          command: '/prevCatePage',
-          action: 'secondDisplay_cat',
+          command: '/prevLeaguePage',
+          action: 'secondDisplay_leagues',
         }),
       },
       {

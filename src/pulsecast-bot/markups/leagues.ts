@@ -2,14 +2,14 @@ export const leagues = {
   firstDisplay: [
     [
       {
-        text: 'EPL',
+        text: 'EPL 🏴󠁧󠁢󠁥󠁮󠁧󠁿',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '152',
         }),
       },
       {
-        text: 'UEFA Champions League',
+        text: 'UEFA Champions League 🇪🇺',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '3',
@@ -18,14 +18,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'La Liga - Spain',
+        text: 'La Liga - Spain 🇪🇸',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '302',
         }),
       },
       {
-        text: 'Serie A - Italy',
+        text: 'Serie A - Italy 🇮🇹',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '207',
@@ -34,14 +34,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'Bundesliga - Germany',
+        text: 'Bundesliga - Germany 🇩🇪',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '175',
         }),
       },
       {
-        text: 'Ligue 1 - France',
+        text: 'Ligue 1 - France 🇫🇷',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '168',
@@ -50,14 +50,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'UEFA Europa League',
+        text: 'UEFA Europa League 🇪🇺',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '4',
         }),
       },
       {
-        text: 'EFL Championship',
+        text: 'EFL Championship 🏴󠁧󠁢󠁥󠁮󠁧󠁿',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '153',
@@ -66,14 +66,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'Brazil Série A',
+        text: 'Brazil Série A 🇧🇷',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '99',
         }),
       },
       {
-        text: 'CONMEBOL Libertadores',
+        text: 'CONMEBOL Libertadores 🌎',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '18',
@@ -82,14 +82,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'MLS - USA',
+        text: 'MLS - USA 🇺🇸',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '332',
         }),
       },
       {
-        text: 'Eredivisie - Netherlands',
+        text: 'Eredivisie - Netherlands 🇳🇱',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '244',
@@ -98,13 +98,29 @@ export const leagues = {
     ],
     [
       {
-        text: 'close ✕',
+        text: 'Copa del Rey 🇪🇸',
+        callback_data: JSON.stringify({
+          command: '/leagueSelected',
+          id: '300',
+        }),
+      },
+      {
+        text: 'NPFL 🇳🇬',
+        callback_data: JSON.stringify({
+          command: '/leagueSelected',
+          id: '248',
+        }),
+      },
+    ],
+    [
+      {
+        text: 'close ❌',
         callback_data: JSON.stringify({
           command: '/close',
         }),
       },
       {
-        text: ' > ',
+        text: '>',
         callback_data: JSON.stringify({
           command: '/nextLeaguePage',
           action: 'secondDisplay_leagues',
@@ -116,14 +132,14 @@ export const leagues = {
   secondDisplay: [
     [
       {
-        text: 'Primeira Liga - Portugal',
+        text: 'Primeira Liga - Portugal 🇵🇹',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '266',
         }),
       },
       {
-        text: 'Turkish Süper Lig',
+        text: 'Turkish Süper Lig 🇹🇷',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '322',
@@ -132,14 +148,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'Greek Super League',
+        text: 'Greek Super League 🇬🇷',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '178',
         }),
       },
       {
-        text: 'Argentine Primera División',
+        text: 'Argentine Primera División 🇦🇷',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '43',
@@ -148,14 +164,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'Chilean Primera División',
+        text: 'Chilean Primera División 🇨🇱',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '115',
         }),
       },
       {
-        text: 'CONMEBOL Sudamericana',
+        text: 'CONMEBOL Sudamericana 🌎',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '385',
@@ -164,14 +180,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'Norwegian Eliteserien',
+        text: 'Norwegian Eliteserien 🇳🇴',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '253',
         }),
       },
       {
-        text: 'Swiss Superleague',
+        text: 'Swiss Superleague 🇨🇭',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '308',
@@ -180,14 +196,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'Austrian Bundesliga',
+        text: 'Austrian Bundesliga 🇦🇹',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '56',
         }),
       },
       {
-        text: 'Allsvenskan - Sweden',
+        text: 'Allsvenskan - Sweden 🇸🇪',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '307',
@@ -196,14 +212,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'Belgium First Div',
+        text: 'Belgium First Div 🇧🇪',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '63',
         }),
       },
       {
-        text: 'Danish Superliga',
+        text: 'Danish Superliga 🇩🇰',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '135',
@@ -219,7 +235,7 @@ export const leagues = {
         }),
       },
       {
-        text: ' > ',
+        text: '>',
         callback_data: JSON.stringify({
           command: '/nextLeaguePage',
           action: 'thirdDisplay_leagues',
@@ -231,14 +247,14 @@ export const leagues = {
   thirdDisplay: [
     [
       {
-        text: 'Russian Premier League',
+        text: 'Russian Premier League 🇷🇺',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '344',
         }),
       },
       {
-        text: 'Scottish Cup',
+        text: 'Scottish Cup 🏴󠁧󠁢󠁳󠁣󠁴󠁿',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '280',
@@ -247,14 +263,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'Polish Ekstraklasa',
+        text: 'Polish Ekstraklasa 🇵🇱',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '259',
         }),
       },
       {
-        text: 'Finnish Veikkausliiga',
+        text: 'Finnish Veikkausliiga 🇫🇮',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '352',
@@ -263,14 +279,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'K League 1 - Korea',
+        text: 'K League 1 - Korea 🇰🇷',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '219',
         }),
       },
       {
-        text: 'Liga MX - Mexico',
+        text: 'Liga MX - Mexico 🇲🇽',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '634',
@@ -279,14 +295,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'J1 League - Japan',
+        text: 'J1 League - Japan 🇯🇵',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '209',
         }),
       },
       {
-        text: 'Chinese Super League',
+        text: 'Chinese Super League 🇨🇳',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '118',
@@ -295,14 +311,14 @@ export const leagues = {
     ],
     [
       {
-        text: 'A-League - Australia',
+        text: 'A-League - Australia 🇦🇺',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '',
         }),
       },
       {
-        text: 'Saudi Pro League',
+        text: 'Saudi Pro League 🇸🇦',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '278',
@@ -311,7 +327,7 @@ export const leagues = {
     ],
     [
       {
-        text: 'PSL -South African',
+        text: 'PSL -South African 🇿🇦',
         callback_data: JSON.stringify({
           command: '/leagueSelected',
           id: '297',
@@ -327,7 +343,7 @@ export const leagues = {
         }),
       },
       {
-        text: 'close ✕',
+        text: 'close ❌',
         callback_data: JSON.stringify({
           command: '/close',
         }),

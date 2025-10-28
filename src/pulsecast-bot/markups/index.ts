@@ -1,11 +1,29 @@
-import { acceptDisclaimerMessageMarkup } from './acceptDisclaimer-message';
+import { acceptedDisclaimerMessageMarkup } from './acceptDisclaimer-message';
+import { allFixtures } from './allFixtures';
+import { allLiveMatch } from './allLiveMatches';
 import { marketCategories } from './categories';
+import { displayPrivateKeyMarkup } from './displayPrivateKey';
+import { exportWalletWarningMarkup } from './exportWalletWarning';
+import { leagueAction } from './leagueAction';
+import { leaguefixtures } from './leagueFixtures';
+import { leagueLiveMatch } from './leagueLiveMatch';
 import { leagues } from './leagues';
+import { resetWalletWarningMarkup } from './resetWalletWarning';
+import { walletDetailsMarkup } from './walletDetails';
 import { welcomeMessageMarkup } from './welcome';
 
 export {
   welcomeMessageMarkup,
-  acceptDisclaimerMessageMarkup,
+  acceptedDisclaimerMessageMarkup,
   marketCategories,
   leagues,
+  leagueAction,
+  leagueLiveMatch,
+  allLiveMatch,
+  leaguefixtures,
+  allFixtures,
+  walletDetailsMarkup,
+  exportWalletWarningMarkup,
+  displayPrivateKeyMarkup,
+  resetWalletWarningMarkup,
 };

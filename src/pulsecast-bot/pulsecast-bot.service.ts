@@ -1,8 +1,16 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import * as TelegramBot from 'node-telegram-bot-api';
 import { HttpService } from '@nestjs/axios';
-import { acceptDisclaimerMessageMarkup, welcomeMessageMarkup } from './markups';
+import {
+  acceptedDisclaimerMessageMarkup,
+  welcomeMessageMarkup,
+} from './markups';
 import { MarkupService } from './markup.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { User } from 'src/database/schemas/user.schema';
+import { Model } from 'mongoose';
+import { WalletService } from 'src/wallet/wallet.service';
+import { Session, SessionDocument } from 'src/database/schemas/session.schema';
 
 @Injectable()
 export class PulsecastBotService {
@@ -14,6 +22,9 @@ export class PulsecastBotService {
     private readonly httpService: HttpService,
     @Inject(forwardRef(() => MarkupService))
     private readonly markupService: MarkupService,
+    private readonly walletService: WalletService,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+    @InjectModel(Session.name) private readonly sessionModel: Model<Session>,
   ) {
     this.pulseBot = new TelegramBot(this.token, { polling: true });
     this.pulseBot.on('message', this.handleRecievedMessages);
@@ -27,11 +38,22 @@ export class PulsecastBotService {
         return;
       }
 
+      await this.pulseBot.sendChatAction(msg.chat.id, 'typing');
+
+      const [user] = await Promise.all([
+        this.userModel.findOne({ chatId: msg.chat.id }),
+        this.sessionModel.findOne({ chatId: msg.chat.id }),
+      ]);
+
       console.log(msg.text);
       const command = msg.text.trim();
 
       if (command === '/start' && msg.chat.type === 'private') {
         const username = `${msg.from.username}`;
+
+        if (!user) {
+          await this.saveUser(msg.chat.id, username);
+        }
 
         const welcome = await welcomeMessageMarkup(username);
         const replyMarkup = { inline_keyboard: welcome.keyboard };
@@ -59,7 +81,7 @@ export class PulsecastBotService {
     this.logger.debug(query);
     let command: string;
     let action: string;
-    // let slug: string;
+    let leagueId: string;
 
     // let parsedData;
 
@@ -76,7 +98,6 @@ export class PulsecastBotService {
       }
     }
 
-    // function to split country from language
     function splitword(word) {
       return word.split('_');
     }
@@ -85,18 +106,38 @@ export class PulsecastBotService {
       command = JSON.parse(query.data).command;
       //   userChatId = JSON.parse(query.data).userChatId;
       action = JSON.parse(query.data).action;
-      //   slug = JSON.parse(query.data).slug;
+      leagueId = JSON.parse(query.data).id;
     } else {
       command = query.data;
     }
 
     try {
+      const user = await this.userModel.findOne({ chatId: chatId });
+      let session: SessionDocument;
+      if (
+        !user ||
+        (!user.acceptedDiscalimer && command !== '/acceptDisclaimer')
+      ) {
+        return await this.pulseBot.sendMessage(
+          chatId,
+          `Please click /start to setup your account.`,
+        );
+      }
       switch (command) {
         case '/acceptDisclaimer':
           await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
 
           //TODO: MAKE USER ACCEPTDISCLAIMER AS TRUE
-          const allFeatures = await acceptDisclaimerMessageMarkup();
+          await this.userModel.findOneAndUpdate(
+            { chatId: chatId },
+            {
+              acceptedDiscalimer: true,
+            },
+            { new: true }, // This ensures the updated document is returned
+          );
+          const allFeatures = await acceptedDisclaimerMessageMarkup(
+            user.svmWalletAddress,
+          );
           if (allFeatures) {
             const replyMarkup = { inline_keyboard: allFeatures.keyboard };
             return await this.pulseBot.sendMessage(
@@ -109,6 +150,120 @@ export class PulsecastBotService {
             );
           }
           return;
+
+        case '/walletDetails':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          await this.markupService.sendWalletDetails(chatId, user);
+          return;
+
+        case '/exportWallet':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          if (!user!.svmWalletAddress) {
+            return this.pulseBot.sendMessage(chatId, `You Don't have a wallet`);
+          }
+          await this.markupService.showExportWalletWarning(chatId);
+          return;
+
+        case '/confirmExportWallet':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          session = await this.sessionModel.create({
+            chatId: chatId,
+            exportWallet: true,
+          });
+          if (session && user!.svmWalletDetails) {
+            let decryptedSVMWallet;
+            if (user!.svmWalletDetails) {
+              decryptedSVMWallet = await this.walletService.decryptSVMWallet(
+                process.env.DEFAULT_WALLET_PIN!,
+                user!.svmWalletDetails,
+              );
+            }
+
+            if (decryptedSVMWallet.privateKey) {
+              const latestSession = await this.sessionModel.findOne({
+                chatId: chatId,
+              });
+              const deleteMessagesPromises = [
+                ...latestSession!.userInputId.map((id) =>
+                  this.pulseBot.deleteMessage(chatId, id),
+                ),
+              ];
+
+              // Execute all deletions concurrently
+              await Promise.all(deleteMessagesPromises);
+
+              // Display the decrypted private key to the user
+              await this.markupService.displayWalletPrivateKey(
+                chatId,
+                decryptedSVMWallet.privateKey || '',
+              );
+
+              return;
+            }
+
+            // Delete the session after operations
+            await this.sessionModel.deleteMany({ chatId: chatId });
+          }
+          return await this.pulseBot.sendMessage(
+            query.message.chat.id,
+            `Processing command failed, please try again`,
+          );
+
+        case '/resetWallet':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          return this.markupService.showResetWalletWarning(chatId);
+
+        case '/confirmReset':
+          // delete any existing session if any
+          await this.sessionModel.deleteMany({ chatId: chatId });
+          // create a new session
+          session = await this.sessionModel.create({
+            chatId: chatId,
+            resetWallet: true,
+          });
+          if (session) {
+            try {
+              await this.pulseBot.sendChatAction(chatId, 'typing');
+              if (!user) {
+                return await this.pulseBot.sendMessage(
+                  chatId,
+                  'No detail of this user found',
+                );
+              }
+
+              const newSVMWallet = this.walletService.createSVMWallet();
+              const [encryptedSVMWalletDetails] = await Promise.all([
+                this.walletService.encryptSVMWallet(
+                  process.env.DEFAULT_WALLET_PIN!,
+                  newSVMWallet.privateKey,
+                ),
+              ]);
+
+              await this.userModel.updateOne(
+                { chatId: chatId },
+                {
+                  $set: {
+                    svmWalletAddress: newSVMWallet.address,
+                    svmWalletDetails: encryptedSVMWalletDetails.json,
+                  },
+                },
+              );
+
+              await this.pulseBot.sendMessage(
+                chatId,
+                `Old Wallet deleted successfully, and a new one has be created\n\n<b>wallet :</b> <code>${newSVMWallet.address}</code>`,
+                { parse_mode: 'HTML' },
+              );
+              await this.sessionModel.deleteMany();
+              return;
+            } catch (error) {
+              console.log(error);
+            }
+          }
+          return await this.pulseBot.sendMessage(
+            query.message.chat.id,
+            `Processing command failed, please try again`,
+          );
 
         case '/leagues':
           await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
@@ -150,8 +305,54 @@ export class PulsecastBotService {
           }
           return;
 
+        case '/leagueSelected':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          await this.markupService.promptLeagueActions(chatId, leagueId);
+          return;
+
+        case '/live':
+        case '/liveMatches':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          if (leagueId) {
+            await this.markupService.displayLeagueLiveMatches(chatId, leagueId);
+            return;
+          } else {
+            await this.markupService.displayAllLiveMatches(chatId);
+            return;
+          }
+
+        case '/fixture':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          if (leagueId) {
+            await this.markupService.displayLeagueFixtures(chatId, leagueId);
+            return;
+          } else {
+            await this.markupService.displayAllFixture(chatId);
+            return;
+          }
+
+        case '/Refresh':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          if (leagueId) {
+            //TODO:REFRESH LEAGUE LIVE MATCH
+            return;
+          } else {
+            //TODO:REFRESH LEAGUE ALL LIVE MATCH
+            return;
+          }
+
         case '/close':
           await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          return await this.pulseBot.deleteMessage(
+            query.message.chat.id,
+            query.message.message_id,
+          );
+
+        case '/closeDelete':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          await this.sessionModel.deleteMany({
+            chatId: chatId,
+          });
           return await this.pulseBot.deleteMessage(
             query.message.chat.id,
             query.message.message_id,
@@ -168,28 +369,27 @@ export class PulsecastBotService {
     }
   };
 
-  getKeyboard(page = 0) {
-    // List of buttons
-    const buttons = [
-      'Button 1',
-      'Button 2',
-      'Button 3',
-      'Button 4',
-      'Button 5',
-    ];
-    const pageSize = 2;
-    const start = page * pageSize;
-    const pageButtons = buttons
-      .slice(start, start + pageSize)
-      .map((text) => [{ text, callback_data: text }]);
+  saveUser = async (chatId: string, username: string) => {
+    try {
+      const newSVMWallet = this.walletService.createSVMWallet();
+      const [encryptedSVMWalletDetails] = await Promise.all([
+        this.walletService.encryptSVMWallet(
+          process.env.DEFAULT_WALLET_PIN!,
+          newSVMWallet.privateKey,
+        ),
+      ]);
 
-    // Add navigation
-    const nav = [];
-    if (page > 0) nav.push({ text: '⬅️ Prev', callback_data: 'prev' });
-    if ((page + 1) * pageSize < buttons.length)
-      nav.push({ text: 'Next ➡️', callback_data: 'next' });
-    if (nav.length) pageButtons.push(nav);
+      // Save user details
+      const newUser = new this.userModel({
+        chatId,
+        username,
+        svmWalletAddress: newSVMWallet.address,
+        svmWalletDetails: encryptedSVMWalletDetails.json,
+      });
 
-    return { inline_keyboard: pageButtons };
-  }
+      return await newUser.save();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 }

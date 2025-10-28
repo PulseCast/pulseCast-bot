@@ -4,11 +4,18 @@ import { PulsecastBotService } from './pulsecast-bot.service';
 import {
   allFixtures,
   allLiveMatch,
+  displayPrivateKeyMarkup,
+  exportWalletWarningMarkup,
   leagueAction,
   leaguefixtures,
   leagueLiveMatch,
   leagues,
+  resetWalletWarningMarkup,
+  walletDetailsMarkup,
 } from './markups';
+import { UserDocument } from 'src/database/schemas/user.schema';
+import { WalletService } from 'src/wallet/wallet.service';
+import { USDC } from 'src/utils/constants';
 
 @Injectable()
 export class MarkupService {
@@ -18,6 +25,7 @@ export class MarkupService {
     private readonly httpService: HttpService,
     @Inject(forwardRef(() => PulsecastBotService))
     private readonly pulseBotService: PulsecastBotService,
+    private readonly walletService: WalletService,
   ) {}
 
   displayLeagues = async (chatId: string, changeDisplay?: any) => {
@@ -168,6 +176,117 @@ export class MarkupService {
         );
       }
       return;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  sendWalletDetails = async (chatId: string, user: UserDocument) => {
+    try {
+      const { balance } = await this.walletService.getSolBalance(
+        user.svmWalletAddress,
+        process.env.SOLANA_RPC,
+      );
+      const { balance: usdcBalance } =
+        await this.walletService.getSPLTokenBalance(
+          user.svmWalletAddress,
+          USDC.address,
+          process.env.SOLANA_RPC,
+          USDC.decimal,
+        );
+      const walletDetails = await walletDetailsMarkup(
+        user.svmWalletAddress,
+        balance,
+        usdcBalance,
+      );
+      if (walletDetailsMarkup!) {
+        const replyMarkup = {
+          inline_keyboard: walletDetails.keyboard,
+        };
+
+        return await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          walletDetails.message,
+          {
+            parse_mode: 'HTML',
+            reply_markup: replyMarkup,
+          },
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  showExportWalletWarning = async (chatId: string) => {
+    try {
+      const showExportWarning = await exportWalletWarningMarkup();
+      if (showExportWarning) {
+        const replyMarkup = { inline_keyboard: showExportWarning.keyboard };
+
+        return await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          showExportWarning.message,
+          {
+            parse_mode: 'HTML',
+            reply_markup: replyMarkup,
+          },
+        );
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  displayWalletPrivateKey = async (chatId: string, privateKeySVM: string) => {
+    try {
+      const displayPrivateKey = await displayPrivateKeyMarkup(privateKeySVM);
+      if (displayPrivateKey) {
+        const replyMarkup = { inline_keyboard: displayPrivateKey.keyboard };
+
+        const sendPrivateKey = await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          displayPrivateKey.message,
+          {
+            parse_mode: 'HTML',
+            reply_markup: replyMarkup,
+          },
+        );
+        if (sendPrivateKey) {
+          // Delay the message deletion by 1 minute
+          setTimeout(async () => {
+            try {
+              // Delete the message after 1 minute
+              await this.pulseBotService.pulseBot.deleteMessage(
+                chatId,
+                sendPrivateKey.message_id,
+              );
+            } catch (error) {
+              console.error('Error deleting message:', error);
+            }
+          }, 60000);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  showResetWalletWarning = async (chatId: string) => {
+    try {
+      const showResetWarning = await resetWalletWarningMarkup();
+      if (showResetWarning) {
+        const replyMarkup = { inline_keyboard: showResetWarning.keyboard };
+
+        return await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          showResetWarning.message,
+          {
+            parse_mode: 'HTML',
+            reply_markup: replyMarkup,
+          },
+        );
+      }
     } catch (error) {
       console.log(error);
     }

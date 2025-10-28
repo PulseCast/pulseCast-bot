@@ -174,6 +174,16 @@ export const leagueData = [
     id: '297',
     logo: 'https://apiv2.allsportsapi.com/logo/logo_leagues/297_psl.png',
   },
+  {
+    text: 'Copa del Rey 🇪🇸',
+    id: '300',
+    logo: 'https://apiv2.allsportsapi.com/logo/logo_leagues/300_copa-del-rey.png',
+  },
+  {
+    text: 'NPFL 🇳🇬',
+    id: '248',
+    logo: 'https://apiv2.allsportsapi.com/logo/logo_leagues/248_npfl.png',
+  },
 ];
 
 export const getLeagueById = (id: string) => {

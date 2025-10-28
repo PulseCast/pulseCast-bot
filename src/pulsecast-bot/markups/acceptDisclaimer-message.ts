@@ -1,19 +1,19 @@
-export const acceptDisclaimerMessageMarkup = async () => {
+export const acceptedDisclaimerMessageMarkup = async (
+  walletAddress: string,
+) => {
   return {
-    message: `🎯 Great! You’re all set.\n\n\nRemember ⇢ predictions are meant to be fun, social, and transparent.\nYou can create private pots with friends or join public ones to test your intuition.\n\nWhat would you like to do next?`,
+    message: `🎯 Great! You’re all set.\n\n\nRemember ⇢ predictions are meant to be fun, social, and transparent.\nYou can create private pots with friends or join public ones to test your intuition.\n\n<b>Wallet :</b> <code>${walletAddress}</code>\n\nWhat would you like to do next?`,
     keyboard: [
       [
         {
-          text: '💰 Create Pot',
+          text: '💳 Wallet',
           callback_data: JSON.stringify({
-            command: `/createPot`,
+            command: '/walletDetails',
           }),
         },
         {
-          text: '💰 Join Pot',
-          callback_data: JSON.stringify({
-            command: `/joinPot`,
-          }),
+          text: '➕ Add to Group',
+          url: `${process.env.BOT_URL}?startgroup=true`,
         },
       ],
       [
@@ -48,12 +48,6 @@ export const acceptDisclaimerMessageMarkup = async () => {
           callback_data: JSON.stringify({
             command: `/nextFixtures`,
           }),
-        },
-      ],
-      [
-        {
-          text: '➕ Add to Group',
-          url: `${process.env.BOT_URL}?startgroup=true`,
         },
       ],
     ],

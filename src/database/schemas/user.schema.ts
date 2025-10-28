@@ -18,13 +18,13 @@ export class User {
   svmWalletDetails: string;
 
   @Prop({ default: 0 })
-  totalWinningsMicros: number;
+  totalWinnings: number;
 
   @Prop({ default: 0 })
-  totalLossesMicros: number;
+  totalLosses: number;
 
-  @Prop()
-  referralCode: string;
+  // @Prop()
+  // referralCode: string;
 
   @Prop({ default: false })
   acceptedDiscalimer: boolean;

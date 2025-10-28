@@ -21,6 +21,14 @@ export const leagueAction = async (leagueId: string) => {
           }),
         },
       ],
+      [
+        {
+          text: 'close ❌',
+          callback_data: JSON.stringify({
+            command: '/close',
+          }),
+        },
+      ],
     ],
   };
 };

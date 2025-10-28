@@ -5,9 +5,12 @@ import { DatabaseModule } from './database/database.module';
 import { PulsecastBotModule } from './pulsecast-bot/pulsecast-bot.module';
 import { UserModule } from './user/user.module';
 import { EventModule } from './event/event.module';
+import { PotModule } from './pot/pot.module';
+import { TradeModule } from './trade/trade.module';
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
-  imports: [DatabaseModule, PulsecastBotModule, UserModule, EventModule],
+  imports: [DatabaseModule, PulsecastBotModule, UserModule, EventModule, PotModule, TradeModule, WalletModule],
   controllers: [AppController],
   providers: [AppService],
 })

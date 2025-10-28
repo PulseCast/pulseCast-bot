@@ -98,6 +98,22 @@ export const leagues = {
     ],
     [
       {
+        text: 'Copa del Rey 🇪🇸',
+        callback_data: JSON.stringify({
+          command: '/leagueSelected',
+          id: '300',
+        }),
+      },
+      {
+        text: 'NPFL 🇳🇬',
+        callback_data: JSON.stringify({
+          command: '/leagueSelected',
+          id: '248',
+        }),
+      },
+    ],
+    [
+      {
         text: 'close ❌',
         callback_data: JSON.stringify({
           command: '/close',

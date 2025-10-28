@@ -1,0 +1,23 @@
+### Get all leagues
+GET http://localhost:3000/prediction-oracle/leagues
+Accept: application/json
+
+
+### Get fixtures (from now → +7 days, in Nigerian time)
+GET http://localhost:3000/prediction-oracle/fixtures
+Accept: application/json
+
+
+### Get fixtures (from now → +7 days, in Nigerian time) with leagueId passed
+GET http://localhost:3000/prediction-oracle/fixtures?leagueId=152
+Accept: application/json
+
+
+### Get live scores
+GET http://localhost:3000/prediction-oracle/livescores
+Accept: application/json
+
+
+### Get live scores with matchId passed
+GET http://localhost:3000/prediction-oracle/livescores?matchId=1715405
+Accept: application/json

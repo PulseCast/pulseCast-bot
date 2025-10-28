@@ -59,7 +59,7 @@ export class PulsecastBotService {
     this.logger.debug(query);
     let command: string;
     let action: string;
-    // let slug: string;
+    let leagueId: string;
 
     // let parsedData;
 
@@ -76,7 +76,6 @@ export class PulsecastBotService {
       }
     }
 
-    // function to split country from language
     function splitword(word) {
       return word.split('_');
     }
@@ -85,7 +84,7 @@ export class PulsecastBotService {
       command = JSON.parse(query.data).command;
       //   userChatId = JSON.parse(query.data).userChatId;
       action = JSON.parse(query.data).action;
-      //   slug = JSON.parse(query.data).slug;
+      leagueId = JSON.parse(query.data).id;
     } else {
       command = query.data;
     }
@@ -149,6 +148,42 @@ export class PulsecastBotService {
             return;
           }
           return;
+
+        case '/leagueSelected':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          await this.markupService.promptLeagueActions(chatId, leagueId);
+          return;
+
+        case '/live':
+        case '/liveMatches':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          if (leagueId) {
+            await this.markupService.displayLeagueLiveMatches(chatId, leagueId);
+            return;
+          } else {
+            await this.markupService.displayAllLiveMatches(chatId);
+            return;
+          }
+
+        case '/fixture':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          if (leagueId) {
+            await this.markupService.displayLeagueFixtures(chatId, leagueId);
+            return;
+          } else {
+            await this.markupService.displayAllFixture(chatId);
+            return;
+          }
+
+        case '/Refresh':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          if (leagueId) {
+            //TODO:REFRESH LEAGUE LIVE MATCH
+            return;
+          } else {
+            //TODO:REFRESH LEAGUE ALL LIVE MATCH
+            return;
+          }
 
         case '/close':
           await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');

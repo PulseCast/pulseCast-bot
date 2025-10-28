@@ -1,7 +1,14 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { PulsecastBotService } from './pulsecast-bot.service';
-import { leagues } from './markups';
+import {
+  allFixtures,
+  allLiveMatch,
+  leagueAction,
+  leaguefixtures,
+  leagueLiveMatch,
+  leagues,
+} from './markups';
 
 @Injectable()
 export class MarkupService {
@@ -13,32 +20,7 @@ export class MarkupService {
     private readonly pulseBotService: PulsecastBotService,
   ) {}
 
-  //   getKeyboard(page = 0) {
-  //     // List of buttons
-  //     const buttons = [
-  //       'Button 1',
-  //       'Button 2',
-  //       'Button 3',
-  //       'Button 4',
-  //       'Button 5',
-  //     ];
-  //     const pageSize = 2;
-  //     const start = page * pageSize;
-  //     const pageButtons = buttons
-  //       .slice(start, start + pageSize)
-  //       .map((text) => [{ text, callback_data: text }]);
-
-  //     // Add navigation
-  //     const nav = [];
-  //     if (page > 0) nav.push({ text: '⬅️ Prev', callback_data: 'prev' });
-  //     if ((page + 1) * pageSize < buttons.length)
-  //       nav.push({ text: 'Next ➡️', callback_data: 'next' });
-  //     if (nav.length) pageButtons.push(nav);
-
-  //     return { inline_keyboard: pageButtons };
-  //   }
-
-  displayLeagues = async (chatId: string, changeDisplay?) => {
+  displayLeagues = async (chatId: string, changeDisplay?: any) => {
     let displayPage;
     console.log(changeDisplay);
     let messageId;
@@ -72,6 +54,120 @@ export class MarkupService {
         );
         return;
       }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  promptLeagueActions = async (chatId: string, leagueId: string) => {
+    try {
+      const selectActionPromptMarkup = await leagueAction(leagueId);
+      if (selectActionPromptMarkup) {
+        const replyMarkup = {
+          inline_keyboard: selectActionPromptMarkup.keyboard,
+        };
+        return await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          selectActionPromptMarkup.message,
+          {
+            parse_mode: 'HTML',
+            reply_markup: replyMarkup,
+          },
+        );
+      }
+      return;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  displayLeagueLiveMatches = async (chatId: string, leagueId: string) => {
+    try {
+      //TODO:FETCH live match API
+      const leagueLiveMatchMarkup = await leagueLiveMatch(leagueId);
+      if (leagueLiveMatchMarkup) {
+        const replyMarkup = {
+          inline_keyboard: leagueLiveMatchMarkup.keyboard,
+        };
+        return await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          leagueLiveMatchMarkup.message,
+          {
+            parse_mode: 'HTML',
+            reply_markup: replyMarkup,
+          },
+        );
+      }
+      return;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  displayAllLiveMatches = async (chatId: string) => {
+    try {
+      //TODO:FETCH live match API
+      const liveMatchMarkup = await allLiveMatch();
+      if (liveMatchMarkup) {
+        const replyMarkup = {
+          inline_keyboard: liveMatchMarkup.keyboard,
+        };
+        return await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          liveMatchMarkup.message,
+          {
+            parse_mode: 'HTML',
+            reply_markup: replyMarkup,
+          },
+        );
+      }
+      return;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  displayLeagueFixtures = async (chatId: string, leagueId: string) => {
+    try {
+      //TODO:FETCH fixture API
+      const leagueFixtureMarkup = await leaguefixtures(leagueId);
+      if (leagueFixtureMarkup) {
+        const replyMarkup = {
+          inline_keyboard: leagueFixtureMarkup.keyboard,
+        };
+        return await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          leagueFixtureMarkup.message,
+          {
+            parse_mode: 'HTML',
+            reply_markup: replyMarkup,
+          },
+        );
+      }
+      return;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  displayAllFixture = async (chatId: string) => {
+    try {
+      //TODO:FETCH fixtures API
+      const fixtureMarkup = await allFixtures();
+      if (fixtureMarkup) {
+        const replyMarkup = {
+          inline_keyboard: fixtureMarkup.keyboard,
+        };
+        return await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          fixtureMarkup.message,
+          {
+            parse_mode: 'HTML',
+            reply_markup: replyMarkup,
+          },
+        );
+      }
+      return;
     } catch (error) {
       console.log(error);
     }

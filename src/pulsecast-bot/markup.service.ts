@@ -16,6 +16,7 @@ import {
 import { UserDocument } from 'src/database/schemas/user.schema';
 import { WalletService } from 'src/wallet/wallet.service';
 import { USDC } from 'src/utils/constants';
+import { PredictionOracleService } from 'src/prediction-oracle/providers/prediction-oracle.service';
 
 @Injectable()
 export class MarkupService {
@@ -23,6 +24,7 @@ export class MarkupService {
 
   constructor(
     private readonly httpService: HttpService,
+    private predictionOracle: PredictionOracleService,
     @Inject(forwardRef(() => PulsecastBotService))
     private readonly pulseBotService: PulsecastBotService,
     private readonly walletService: WalletService,
@@ -92,6 +94,14 @@ export class MarkupService {
   displayLeagueLiveMatches = async (chatId: string, leagueId: string) => {
     try {
       //TODO:FETCH live match API
+      const fixtures = await this.predictionOracle.getFixtures(leagueId);
+
+      if (!fixtures || fixtures.length === 0) {
+        return await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          'Sorry There is no fixture for this league',
+        );
+      }
       const leagueLiveMatchMarkup = await leagueLiveMatch(leagueId);
       if (leagueLiveMatchMarkup) {
         const replyMarkup = {
@@ -115,6 +125,7 @@ export class MarkupService {
   displayAllLiveMatches = async (chatId: string) => {
     try {
       //TODO:FETCH live match API
+
       const liveMatchMarkup = await allLiveMatch();
       if (liveMatchMarkup) {
         const replyMarkup = {
@@ -138,7 +149,16 @@ export class MarkupService {
   displayLeagueFixtures = async (chatId: string, leagueId: string) => {
     try {
       //TODO:FETCH fixture API
-      const leagueFixtureMarkup = await leaguefixtures(leagueId);
+
+      const fixtures = await this.predictionOracle.getFixtures(leagueId);
+
+      if (!fixtures || fixtures.length === 0) {
+        return await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          'Sorry There is no fixture for this league',
+        );
+      }
+      const leagueFixtureMarkup = await leaguefixtures(leagueId, fixtures);
       if (leagueFixtureMarkup) {
         const replyMarkup = {
           inline_keyboard: leagueFixtureMarkup.keyboard,

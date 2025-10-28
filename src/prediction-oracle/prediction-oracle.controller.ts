@@ -3,20 +3,22 @@ import { PredictionOracleService } from './providers/prediction-oracle.service';
 
 @Controller('prediction-oracle')
 export class PredictionOracleController {
-    constructor(private readonly predictionOracleService: PredictionOracleService) { }
+  constructor(
+    private readonly predictionOracleService: PredictionOracleService,
+  ) {}
 
-    @Get('leagues')
-    async getLeagues() {
-        return await this.predictionOracleService.getLeagues();
-    }
+  @Get('leagues')
+  async getLeagues() {
+    return await this.predictionOracleService.getLeagues();
+  }
 
-    @Get('fixtures')
-    async getFixtures(@Query() dto: { leagueId?: string }) {
-        return await this.predictionOracleService.getFixtures(dto.leagueId);
-    }
+  @Get('fixtures')
+  async getFixtures(@Query() dto: { leagueId?: string }) {
+    return await this.predictionOracleService.getFixtures(dto.leagueId);
+  }
 
-    @Get('livescores')
-    async getLiveScores(@Query() dto: { matchId?: string }) {
-        return await this.predictionOracleService.getLiveScores(dto.matchId);
-    }
+  @Get('livescores')
+  async getLiveScores(@Query() dto: { matchId?: string }) {
+    return await this.predictionOracleService.getLiveScores(dto.matchId);
+  }
 }

@@ -6,6 +6,7 @@ import { HttpModule } from '@nestjs/axios';
 @Module({
   controllers: [PredictionOracleController],
   providers: [PredictionOracleService],
-  imports: [HttpModule]
+  imports: [HttpModule],
+  exports: [PredictionOracleService],
 })
 export class PredictionOracleModule {}

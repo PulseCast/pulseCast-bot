@@ -67,7 +67,9 @@ export class PulsecastBotService {
       const matchGroup = msg.text.trim().match(regexGroup);
       const regexAmount = /^\d+(\.\d+)?$/;
       const regexBet = /\/start\s+bet_([a-zA-Z0-9]+)/;
+      const regexsell = /\/start\s+sell_([a-zA-Z0-9]+)/;
       const matchBet = msg.text.trim().match(regexBet);
+      const matchsell = msg.text.trim().match(regexsell);
 
       if (msg.chat.type !== 'private' && matchGroup) {
         const command = matchGroup[1];
@@ -90,6 +92,11 @@ export class PulsecastBotService {
             matchBet[1],
           );
         }
+      }
+
+      if (matchsell) {
+        await this.pulseBot.sendChatAction(msg.chat.id, 'typing');
+        return await this.markupService.promptSellAmount(msg.chat.id);
       }
 
       if (
@@ -428,6 +435,12 @@ export class PulsecastBotService {
             matchId,
             user,
             Outcome.DRAW,
+          );
+        case '/positions':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          return await this.markupService.displayPositions(
+            query.message.chat.id,
+            user,
           );
 
         case '/Refresh':

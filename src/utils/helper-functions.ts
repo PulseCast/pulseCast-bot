@@ -5,6 +5,15 @@ export const to12Hour = (time: string) => {
   return `${hour12}:${minute.toString().padStart(2, '0')} ${suffix}`;
 };
 
+export const to_12Hour = (date: Date | string) => {
+  const d = new Date(date);
+  let hours = d.getHours();
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes} ${ampm}`;
+};
+
 export const formatDate = (date: string) => {
   const d = new Date(date);
   return d.toLocaleDateString('en-US', {

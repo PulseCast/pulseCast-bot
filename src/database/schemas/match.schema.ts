@@ -18,7 +18,6 @@ export enum MatchStatus {
 export type Team = {
   name: string;
   key: number;
-  init: string;
 };
 
 @Schema({ timestamps: true })
@@ -34,6 +33,9 @@ export class Match {
 
   @Prop()
   startTime: Date;
+
+  @Prop()
+  startDate: Date;
 
   @Prop({ enum: MatchStatus, default: MatchStatus.PRE })
   status: MatchStatus;

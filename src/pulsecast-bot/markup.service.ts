@@ -5,6 +5,7 @@ import {
   allFixtures,
   allLiveMatch,
   displayPrivateKeyMarkup,
+  displayUserPositions,
   exportWalletWarningMarkup,
   leagueAction,
   leaguefixtures,
@@ -22,6 +23,13 @@ import { Model } from 'mongoose';
 import { Market, MarketDocument } from 'src/database/schemas/market.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Outcome, Session } from 'src/database/schemas/session.schema';
+import { Position } from 'src/database/schemas/position.schema';
+import { Match } from 'src/database/schemas/match.schema';
+
+// type PopulatedPosition = Position & {
+//   market: Market;
+//   match?: Match;
+// };
 
 @Injectable()
 export class MarkupService {
@@ -34,7 +42,9 @@ export class MarkupService {
     private readonly pulseBotService: PulsecastBotService,
     private readonly walletService: WalletService,
     @InjectModel(Market.name) private readonly marketModel: Model<Market>,
+    @InjectModel(Match.name) private readonly matchModel: Model<Match>,
     @InjectModel(Session.name) private readonly sessionModel: Model<Session>,
+    @InjectModel(Position.name) private positionModel: Model<Position>,
   ) {}
 
   displayLeagues = async (chatId: string, changeDisplay?: any) => {
@@ -482,7 +492,7 @@ export class MarkupService {
       });
       await this.pulseBotService.pulseBot.sendMessage(
         chatId,
-        `Buyin <b>$${outcome}</b> position.\n` +
+        `Buying <b>$${outcome}</b> position.\n` +
           `Reply with the amount of USDC you wish to use (0 - ${usdcBalance}, e.g., 10).\n`,
         {
           parse_mode: 'HTML',
@@ -491,6 +501,95 @@ export class MarkupService {
           },
         },
       );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  promptSellAmount = async (chatId: string) => {
+    try {
+      await this.sessionModel.deleteMany({ chatId: chatId });
+
+      await this.sessionModel.create({
+        chatId: chatId,
+        sellPositionAmount: true,
+      });
+      return await this.pulseBotService.pulseBot.sendMessage(
+        chatId,
+        `Selling  position.\n` +
+          `Reply with the amount of shares you wish to  sell\n`,
+        {
+          parse_mode: 'HTML',
+          reply_markup: {
+            force_reply: true,
+          },
+        },
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  displayPositions = async (chatId: string, user: UserDocument) => {
+    type PopulatedPosition = Position & { market: Market };
+    try {
+      // const positions = await this.positionModel
+      //   .find({ user: user._id })
+      //   .populate({
+      //     path: 'market',
+      //     model: 'Market',
+      //   })
+      //   .lean();
+
+      // const rawPostion = positions;
+      // console.log(rawPostion[1].market);
+      // const match = await this.matchModel.findOne({
+      //   matchKey: rawPostion[1].market.matchKey,
+      // });
+      const rawPositions = await this.positionModel
+        .find({ user: user._id })
+        .populate('market')
+        .lean();
+
+      const positions: PopulatedPosition[] = await Promise.all(
+        rawPositions.map(async (pos: any) => {
+          const match = await this.matchModel
+            .findOne({ matchKey: pos.market.matchKey })
+            .lean();
+
+          return {
+            ...pos,
+            market: {
+              ...pos.market,
+              match,
+            },
+          };
+        }),
+      );
+
+      if (!positions) {
+        return await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          'you dnt have any opened positon',
+        );
+      }
+      // const match = await this.matchModel.find({ matchKey: positions.market });
+
+      const market = displayUserPositions(positions);
+      if (market) {
+        const replyMarkup = {
+          inline_keyboard: market.keyboard,
+        };
+        return await this.pulseBotService.pulseBot.sendMessage(
+          chatId,
+          market.message,
+          {
+            parse_mode: 'HTML',
+            reply_markup: replyMarkup,
+          },
+        );
+      }
+      return;
     } catch (error) {
       console.log(error);
     }

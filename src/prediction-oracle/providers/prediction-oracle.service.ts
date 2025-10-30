@@ -288,11 +288,14 @@ export class PredictionOracleService {
 
     return results.map((match: Record<string, any>) => ({
       match_state:
-        match.event_status === '' && match.event_live === '0'
-          ? 'preMatch'
-          : match.event_live === '1'
-            ? 'live'
-            : 'finished',
+        match.event_status === 'finished'
+          ? 'finished'
+          : match.event_status === '' || match.event_live === '0'
+            ? 'pre'
+            : match.event_live === '1' || match.event_status === '2'
+              ? 'live'
+              : 'pre',
+
       // Odds
       home_odd: aggregatedMatchOdd?.home ?? null,
       draw_odd: aggregatedMatchOdd?.draw ?? null,

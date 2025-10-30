@@ -10,6 +10,7 @@ import { PredictionOracleModule } from 'src/prediction-oracle/prediction-oracle.
 import { Market, MarketSchema } from 'src/database/schemas/market.schema';
 import { Match, MatchSchema } from 'src/database/schemas/match.schema';
 import { TradeModule } from 'src/trade/trade.module';
+import { Position, PositionSchema } from 'src/database/schemas/position.schema';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TradeModule } from 'src/trade/trade.module';
       { name: Session.name, schema: SessionSchema },
       { name: Market.name, schema: MarketSchema },
       { name: Match.name, schema: MatchSchema },
+      { name: Position.name, schema: PositionSchema },
     ]),
   ],
   providers: [PulsecastBotService, MarkupService],

@@ -2,6 +2,7 @@ import { acceptedDisclaimerMessageMarkup } from './acceptDisclaimer-message';
 import { allFixtures } from './allFixtures';
 import { allLiveMatch } from './allLiveMatches';
 import { marketCategories } from './categories';
+import { displayUserPositions } from './displayPositions';
 import { displayPrivateKeyMarkup } from './displayPrivateKey';
 import { exportWalletWarningMarkup } from './exportWalletWarning';
 import { leagueAction } from './leagueAction';
@@ -30,4 +31,5 @@ export {
   resetWalletWarningMarkup,
   marketInterface,
   menuMarkup,
+  displayUserPositions,
 };

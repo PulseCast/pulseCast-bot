@@ -53,16 +53,19 @@ export class TradeService {
     }
 
     market = await this.marketModel.findOne(query);
-    const match = await this.predictionOracle.getMatchFixture(matchId);
+    const [match] = await this.predictionOracle.getMatchFixture(matchId);
+    console.log(match);
     const matchState =
-      match.event_status === '' && match.event_live === '0'
-        ? 'pre'
-        : match.event_live === '1'
-          ? 'live'
-          : 'finished';
+      match.event_status === 'finished'
+        ? 'finished'
+        : match.event_status === '' || match.event_live === '0'
+          ? 'pre'
+          : match.event_live === '1' || match.event_status === '2'
+            ? 'live'
+            : 'pre';
 
     const calculatedmarketData =
-      await this.markupService.calculateMarketProbability(match[0], market);
+      await this.markupService.calculateMarketProbability(match, market);
 
     let pricePerShare: number;
     const outcomePot = { potHome: 0, potDraw: 0, potAway: 0 };
@@ -151,14 +154,21 @@ export class TradeService {
 
         console.log(match.event_score);
         const score = parseScore(match.event_score);
+
         const homeTeam = {
           name: match.event_home_team,
           key: match.home_team_key,
         };
+
         const awayTeam = {
           name: match.event_away_team,
           key: match.away_team_key,
         };
+
+        const startDate = new Date(match.event_date); // just the date part
+        const startTime = new Date(
+          `${match.event_date}T${match.event_time}:00Z`,
+        );
         await this.matchModel.create(
           [
             {
@@ -166,7 +176,8 @@ export class TradeService {
               leagueKey: match.league_key,
               homeTeam,
               awayTeam,
-              startTime: match.event_time,
+              startTime,
+              startDate,
               status: matchState,
               homeScore: score.homeScore,
               awayScore: score.awayScore,

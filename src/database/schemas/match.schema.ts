@@ -3,16 +3,16 @@ import * as mongoose from 'mongoose';
 
 export type MatchDocument = mongoose.HydratedDocument<Match>;
 
-export enum MatchOutcome {
-  HOME_WIN = 'HOME_WIN',
+export enum Outcome {
+  HOME_WIN = 'HOME',
   DRAW = 'DRAW',
-  AWAY_WIN = 'AWAY_WIN',
+  AWAY_WIN = 'AWAY',
 }
 
 export enum MatchStatus {
-  PENDING = 'pending',
+  PRE = 'pre',
   LIVE = 'live',
-  ENDED = 'ended',
+  FINISHED = 'finished',
 }
 
 export type Team = {
@@ -25,9 +25,6 @@ export class Match {
   @Prop({ required: true })
   matchKey: string;
 
-  @Prop({ required: true })
-  leagueKey: string;
-
   @Prop({ type: Object, required: true })
   homeTeam: Team;
 
@@ -37,7 +34,7 @@ export class Match {
   @Prop()
   startTime: Date;
 
-  @Prop({ enum: MatchStatus, default: MatchStatus.PENDING })
+  @Prop({ enum: MatchStatus, default: MatchStatus.PRE })
   status: MatchStatus;
 
   @Prop({ default: 0 })
@@ -46,8 +43,8 @@ export class Match {
   @Prop({ default: 0 })
   awayScore: number;
 
-  @Prop({ enum: MatchOutcome, required: false })
-  finalOutcome?: MatchOutcome;
+  @Prop({ enum: Outcome, required: false })
+  finalOutcome?: Outcome;
 }
 
 export const MatchSchema = SchemaFactory.createForClass(Match);

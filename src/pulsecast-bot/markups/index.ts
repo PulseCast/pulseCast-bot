@@ -8,6 +8,7 @@ import { leagueAction } from './leagueAction';
 import { leaguefixtures } from './leagueFixtures';
 import { leagueLiveMatch } from './leagueLiveMatch';
 import { leagues } from './leagues';
+import { marketInterface } from './marketInterface';
 import { resetWalletWarningMarkup } from './resetWalletWarning';
 import { walletDetailsMarkup } from './walletDetails';
 import { welcomeMessageMarkup } from './welcome';
@@ -26,4 +27,5 @@ export {
   exportWalletWarningMarkup,
   displayPrivateKeyMarkup,
   resetWalletWarningMarkup,
+  marketInterface,
 };

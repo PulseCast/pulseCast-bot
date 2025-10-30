@@ -19,6 +19,11 @@ export class PredictionOracleController {
 
   @Get('livescores')
   async getLiveScores(@Query() dto: { matchId?: string }) {
-    return await this.predictionOracleService.getLiveScores(dto.matchId);
+    return await this.predictionOracleService.getLiveScores(null, dto.matchId);
+  }
+
+  @Get('match')
+  async geMatchDetails(@Query() dto: { matchId?: string }) {
+    return await this.predictionOracleService.getMatchFixture(dto.matchId);
   }
 }

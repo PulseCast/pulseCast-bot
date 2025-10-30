@@ -9,7 +9,7 @@ Accept: application/json
 
 
 ### Get fixtures (from now → +7 days, in Nigerian time) with leagueId passed
-GET http://localhost:3000/prediction-oracle/fixtures?leagueId=152
+GET http://localhost:3000/prediction-oracle/fixtures?leagueId=300
 Accept: application/json
 
 
@@ -19,5 +19,10 @@ Accept: application/json
 
 
 ### Get live scores with matchId passed
-GET http://localhost:3000/prediction-oracle/livescores?matchId=1715405
+GET http://localhost:3000/prediction-oracle/livescores?matchId=1608114
+Accept: application/json
+
+
+### Get live scores with matchId passed
+GET http://localhost:3000/prediction-oracle/match?matchId=1626224
 Accept: application/json

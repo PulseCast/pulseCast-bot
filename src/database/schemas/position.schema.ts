@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { MatchOutcome } from './match.schema';
+import { Outcome } from './match.schema';
 
 export type PositionDocument = mongoose.HydratedDocument<Position>;
 
@@ -12,11 +12,11 @@ export class Position {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Market', required: true })
   market: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ enum: MatchOutcome, required: true })
-  side: MatchOutcome;
+  @Prop({ enum: Outcome, required: true })
+  side: Outcome;
 
   @Prop({ required: true })
-  entryOdds: string; // odds when purchased
+  entryProbability: string; // market when purchased
 
   @Prop({ required: true })
   shares: string; // immutable total shares bought
@@ -25,10 +25,13 @@ export class Position {
   remainingShares: string;
 
   @Prop({ required: true })
-  stakePaid: number;
+  stakePaid: string;
 
   @Prop({ default: false })
-  closed: boolean;
+  settled: boolean;
+
+  @Prop()
+  finalPayout: string;
 }
 
 export const PositionSchema = SchemaFactory.createForClass(Position);

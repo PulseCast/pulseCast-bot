@@ -1,6 +1,10 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import {
+  aggregateBestLiveOdds,
+  aggregateBestOdds,
+} from 'src/utils/helper-functions';
 
 @Injectable()
 export class PredictionOracleService {
@@ -132,8 +136,17 @@ export class PredictionOracleService {
    * ⚽ Get live scores
    * Example usage: /livescores?matchId=1
    */
-  async getLiveScores(matchId?: string) {
-    const data = await this.fetchData({ met: 'Livescore', matchId });
+  async getLiveScores(leagueId?: string, matchId?: string) {
+    const params: any = { met: 'Livescore' };
+    if (matchId) {
+      params.matchId = matchId;
+    }
+
+    if (leagueId) {
+      params.leagueId = leagueId;
+    }
+
+    const data = await this.fetchData(params);
 
     const results = data || [];
 
@@ -252,6 +265,65 @@ export class PredictionOracleService {
       //     home: stat.home,
       //     away: stat.away,
       // })) || [],
+    }));
+  }
+
+  /**
+   * 📅 Get match details
+   */
+  async getMatchFixture(matchId?: string) {
+    const [data, oddsData, liveOddsData] = await Promise.all([
+      this.fetchData({ met: 'Fixtures', matchId }),
+      this.fetchData({ met: 'Odds', matchId }),
+      this.fetchData({ met: 'OddsLive', matchId }),
+    ]);
+
+    const results = data || [];
+
+    const matchOdds = oddsData?.[matchId] ?? [];
+    const matchLiveOdds = liveOddsData?.[matchId] ?? [];
+
+    const aggregatedMatchOdd = aggregateBestOdds(matchOdds);
+    const aggregatedMatchOddLive = aggregateBestLiveOdds(matchLiveOdds);
+
+    return results.map((match: Record<string, any>) => ({
+      match_state:
+        match.event_status === '' && match.event_live === '0'
+          ? 'preMatch'
+          : match.event_live === '1'
+            ? 'live'
+            : 'finished',
+      // Odds
+      home_odd: aggregatedMatchOdd?.home ?? null,
+      draw_odd: aggregatedMatchOdd?.draw ?? null,
+      away_odd: aggregatedMatchOdd?.away ?? null,
+
+      home_oddLive: aggregatedMatchOddLive?.home ?? null,
+      draw_oddLive: aggregatedMatchOddLive?.draw ?? null,
+      away_oddLive: aggregatedMatchOddLive?.away ?? null,
+
+      // Match Info
+      event_key: match.event_key,
+      event_date: match.event_date,
+      event_time: match.event_time,
+      event_status: match.event_status,
+      event_live: match.event_live,
+      event_score: match.event_final_result,
+
+      // Teams
+      event_home_team: match.event_home_team,
+      home_team_key: match.home_team_key,
+      home_team_logo: match.home_team_logo,
+      event_away_team: match.event_away_team,
+      away_team_key: match.away_team_key,
+      away_team_logo: match.away_team_logo,
+
+      // League
+      league_name: match.league_name,
+      league_key: match.league_key,
+      league_logo: match.league_logo,
+
+      country_name: match.country_name,
     }));
   }
 }

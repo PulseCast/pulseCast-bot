@@ -3,6 +3,12 @@ import * as mongoose from 'mongoose';
 
 export type SessionDocument = mongoose.HydratedDocument<Session>;
 
+export enum Outcome {
+  HOME_WIN = 'HOME',
+  DRAW = 'DRAW',
+  AWAY_WIN = 'AWAY',
+}
+
 @Schema()
 export class Session {
   @Prop({ type: mongoose.Schema.Types.BigInt, ref: 'User' })
@@ -19,6 +25,24 @@ export class Session {
 
   @Prop({ default: false })
   resetWallet: boolean;
+
+  @Prop({ default: false })
+  sellPostionAmount: boolean;
+
+  @Prop({ default: false })
+  buyPostionAmount: boolean;
+
+  @Prop({ enum: Outcome })
+  outcome: Outcome;
+
+  @Prop()
+  matchId: string;
+
+  @Prop()
+  groupId: string;
+
+  @Prop()
+  sellPostionId: string;
 
   @Prop()
   userInputId: number[];

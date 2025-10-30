@@ -12,8 +12,11 @@ export enum MarketStatus {
 
 @Schema({ timestamps: true })
 export class Market {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Match', required: true })
-  match: mongoose.Schema.Types.ObjectId;
+  // @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Match', required: true })
+  // match: mongoose.Schema.Types.ObjectId;
+
+  @Prop({ required: true })
+  matchKey: string;
 
   @Prop({ enum: MarketStatus, default: MarketStatus.PRE })
   status: MarketStatus;
@@ -28,16 +31,19 @@ export class Market {
   potAway: string;
 
   @Prop()
-  homeOdds: string;
+  homeProbability: string;
 
   @Prop()
-  drawOdds: string;
+  drawProbability: string;
 
   @Prop()
-  awayOdds: string;
+  awayProbability: string;
 
-  @Prop({ default: 0 })
-  liquidity: string;
+  @Prop({ default: '0' })
+  totalPot: string;
+
+  @Prop()
+  groupId: string;
 }
 
 export const MarketSchema = SchemaFactory.createForClass(Market);

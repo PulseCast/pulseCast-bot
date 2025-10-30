@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { MatchOutcome } from './match.schema';
+import { Outcome } from './match.schema';
 
 export type TradeLogDocument = mongoose.HydratedDocument<TradeLog>;
 
@@ -20,8 +20,8 @@ export class TradeLog {
   @Prop({ enum: TradeAction, required: true })
   action: TradeAction;
 
-  @Prop({ enum: MatchOutcome, required: true })
-  side: MatchOutcome;
+  @Prop({ enum: Outcome, required: true })
+  side: Outcome;
 
   @Prop() amount: string; // money paid in (BUY) or taken out (SELL)
 

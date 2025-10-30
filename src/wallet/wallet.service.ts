@@ -21,7 +21,9 @@ import {
   getAccount,
   createTransferInstruction,
   TOKEN_PROGRAM_ID,
+  createAssociatedTokenAccountInstruction,
 } from '@solana/spl-token';
+import { createMemoInstruction } from '@solana/spl-memo';
 
 dotenv.config();
 
@@ -181,6 +183,61 @@ export class WalletService {
     }
   };
 
+  // transferSPLToken = async (
+  //   privateKey: string,
+  //   recipientAddress: string,
+  //   amount: number,
+  //   tokenAddress: string,
+  //   rpcURL: string,
+  //   decimal: number,
+  //   description?: string,
+  // ): Promise<Record<any, unknown>> => {
+  //   try {
+  //     const connection = new Connection(rpcURL, 'confirmed');
+  //     const senderKeypair = Keypair.fromSecretKey(bs58.decode(privateKey));
+  //     const recipientPubkey = new PublicKey(recipientAddress);
+  //     const tokenMint = new PublicKey(tokenAddress);
+
+  //     const senderATA = await getAssociatedTokenAddress(
+  //       tokenMint,
+  //       senderKeypair.publicKey,
+  //     );
+  //     const recipientATA = await getAssociatedTokenAddress(
+  //       tokenMint,
+  //       recipientPubkey,
+  //     );
+
+  //     const transaction = new Transaction().add(
+  //       createTransferInstruction(
+  //         senderATA,
+  //         recipientATA,
+  //         senderKeypair.publicKey,
+  //         amount * 10 ** decimal,
+  //         [],
+  //         TOKEN_PROGRAM_ID,
+  //       ),
+  //     );
+  //     if (description) {
+  //       transaction.add(
+  //         createMemoInstruction(description, [senderKeypair.publicKey]),
+  //       );
+  //     }
+
+  //     const signature = await sendAndConfirmTransaction(
+  //       connection,
+  //       transaction,
+  //       [senderKeypair],
+  //     );
+
+  //     return {
+  //       signature,
+  //       description,
+  //     };
+  //   } catch (error) {
+  //     throw new Error(`Failed to transfer SPL token: ${error.message}`);
+  //   }
+  // };
+
   transferSPLToken = async (
     privateKey: string,
     recipientAddress: string,
@@ -189,7 +246,7 @@ export class WalletService {
     rpcURL: string,
     decimal: number,
     description?: string,
-  ): Promise<Record<any, unknown>> => {
+  ): Promise<Record<string, unknown>> => {
     try {
       const connection = new Connection(rpcURL, 'confirmed');
       const senderKeypair = Keypair.fromSecretKey(bs58.decode(privateKey));
@@ -205,28 +262,49 @@ export class WalletService {
         recipientPubkey,
       );
 
-      const transaction = new Transaction().add(
+      const transaction = new Transaction();
+
+      // ✅ Create recipient ATA if missing
+      const recipientATAInfo = await connection.getAccountInfo(recipientATA);
+      if (!recipientATAInfo) {
+        transaction.add(
+          createAssociatedTokenAccountInstruction(
+            senderKeypair.publicKey, // payer
+            recipientATA, // ATA to create
+            recipientPubkey, // owner of ATA
+            tokenMint, // token mint
+          ),
+        );
+      }
+
+      // ✅ Transfer instruction
+      transaction.add(
         createTransferInstruction(
           senderATA,
           recipientATA,
           senderKeypair.publicKey,
-          amount * 10 ** decimal,
+          BigInt(Math.round(amount * 10 ** decimal)),
           [],
           TOKEN_PROGRAM_ID,
         ),
       );
 
+      // ✅ Optional memo
+      if (description) {
+        transaction.add(
+          createMemoInstruction(description, [senderKeypair.publicKey]),
+        );
+      }
+
       const signature = await sendAndConfirmTransaction(
         connection,
         transaction,
         [senderKeypair],
+        { commitment: 'confirmed' },
       );
 
-      return {
-        signature,
-        description,
-      };
-    } catch (error) {
+      return { signature, description };
+    } catch (error: any) {
       throw new Error(`Failed to transfer SPL token: ${error.message}`);
     }
   };

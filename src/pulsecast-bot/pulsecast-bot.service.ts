@@ -7,10 +7,17 @@ import {
 } from './markups';
 import { MarkupService } from './markup.service';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from 'src/database/schemas/user.schema';
+import { User, UserDocument } from 'src/database/schemas/user.schema';
 import { Model } from 'mongoose';
 import { WalletService } from 'src/wallet/wallet.service';
-import { Session, SessionDocument } from 'src/database/schemas/session.schema';
+import {
+  Outcome,
+  Session,
+  SessionDocument,
+} from 'src/database/schemas/session.schema';
+
+import { Market } from 'src/database/schemas/market.schema';
+import { TradeService } from 'src/trade/trade.service';
 
 @Injectable()
 export class PulsecastBotService {
@@ -23,8 +30,11 @@ export class PulsecastBotService {
     @Inject(forwardRef(() => MarkupService))
     private readonly markupService: MarkupService,
     private readonly walletService: WalletService,
+    @Inject(forwardRef(() => TradeService))
+    private readonly tradeService: TradeService,
     @InjectModel(User.name) private readonly userModel: Model<User>,
     @InjectModel(Session.name) private readonly sessionModel: Model<Session>,
+    @InjectModel(Market.name) private readonly marketModel: Model<Market>,
   ) {
     this.pulseBot = new TelegramBot(this.token, { polling: true });
     this.pulseBot.on('message', this.handleRecievedMessages);
@@ -37,16 +47,57 @@ export class PulsecastBotService {
       if (!msg.text) {
         return;
       }
-
       await this.pulseBot.sendChatAction(msg.chat.id, 'typing');
-
-      const [user] = await Promise.all([
+      const [user, session] = await Promise.all([
         this.userModel.findOne({ chatId: msg.chat.id }),
         this.sessionModel.findOne({ chatId: msg.chat.id }),
       ]);
 
       console.log(msg.text);
+      // const username = `${msg.from.username}`;
+      const chatId = `${msg.chat.id}`;
+      // console.log(chatId);
+      // await this.pulseBot.sendMessage(chatId, 'helloe from group');
+      // console.log(username, chatId);
       const command = msg.text.trim();
+
+      const regexGroup =
+        /^(?:@Pulse_predict_bot|@allbotTestsbot)\s*\/([a-zA-Z0-9_]+)(?:\s+(.*))?$/;
+      const matchGroup = msg.text.trim().match(regexGroup);
+      const regexAmount = /^\d+(\.\d+)?$/;
+      const regexBet = /\/start\s+bet_([a-zA-Z0-9]+)/;
+      const matchBet = msg.text.trim().match(regexBet);
+
+      if (msg.chat.type !== 'private' && matchGroup) {
+        const command = matchGroup[1];
+        return this.handleGroupCommands(command, chatId);
+      }
+      if (matchBet) {
+        await this.pulseBot.deleteMessage(msg.chat.id, msg.message_id);
+
+        // console.log('contract match event:', matchBet[1]);
+
+        if (msg.chat.type !== 'private') {
+          return await this.markupService.displayMarketInterface(
+            msg.chat.id,
+            matchBet[1],
+            true,
+          );
+        } else {
+          return await this.markupService.displayMarketInterface(
+            msg.chat.id,
+            matchBet[1],
+          );
+        }
+      }
+
+      if (
+        (regexAmount.test(msg.text.trim()) && session.buyPostionAmount) ||
+        session.sellPostionAmount
+      ) {
+        // Handle text inputs if not a command
+        return this.handleUserTextInputs(msg, session!);
+      }
 
       if (command === '/start' && msg.chat.type === 'private') {
         const username = `${msg.from.username}`;
@@ -82,6 +133,7 @@ export class PulsecastBotService {
     let command: string;
     let action: string;
     let leagueId: string;
+    let matchId: string;
 
     // let parsedData;
 
@@ -107,22 +159,28 @@ export class PulsecastBotService {
       //   userChatId = JSON.parse(query.data).userChatId;
       action = JSON.parse(query.data).action;
       leagueId = JSON.parse(query.data).id;
+      matchId = JSON.parse(query.data).mId;
     } else {
       command = query.data;
     }
 
     try {
-      const user = await this.userModel.findOne({ chatId: chatId });
+      let user: UserDocument;
       let session: SessionDocument;
-      if (
-        !user ||
-        (!user.acceptedDiscalimer && command !== '/acceptDisclaimer')
-      ) {
-        return await this.pulseBot.sendMessage(
-          chatId,
-          `Please click /start to setup your account.`,
-        );
+      if (query.message.chat.type === 'private') {
+        user = await this.userModel.findOne({ chatId: chatId });
+
+        if (
+          !user ||
+          (!user.acceptedDiscalimer && command !== '/acceptDisclaimer')
+        ) {
+          return await this.pulseBot.sendMessage(
+            chatId,
+            `Please click /start to setup your account.`,
+          );
+        }
       }
+
       switch (command) {
         case '/acceptDisclaimer':
           await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
@@ -331,6 +389,33 @@ export class PulsecastBotService {
             return;
           }
 
+        case '/buyHome':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          return await this.markupService.promptBuyAmount(
+            query.message.chat.id,
+            matchId,
+            user,
+            Outcome.HOME_WIN,
+          );
+
+        case '/buyAway':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          return await this.markupService.promptBuyAmount(
+            query.message.chat.id,
+            matchId,
+            user,
+            Outcome.AWAY_WIN,
+          );
+
+        case '/buyDraw':
+          await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+          return await this.markupService.promptBuyAmount(
+            query.message.chat.id,
+            matchId,
+            user,
+            Outcome.DRAW,
+          );
+
         case '/Refresh':
           await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
           if (leagueId) {
@@ -369,6 +454,62 @@ export class PulsecastBotService {
     }
   };
 
+  //handler for users inputs
+  handleUserTextInputs = async (
+    msg: TelegramBot.Message,
+    session?: SessionDocument,
+    // user?: UserDocument,
+  ) => {
+    await this.pulseBot.sendChatAction(msg.chat.id, 'typing');
+    try {
+      if (session.buyPostionAmount) {
+        const amount = msg.text.trim();
+
+        // console.log(session);
+        const buy = await this.tradeService.buy(
+          `${msg.chat.id}`,
+          session.matchId,
+          session.outcome,
+          +amount,
+          session.groupId ?? null,
+        );
+        if (buy) {
+          await this.pulseBot.sendMessage(
+            msg.chat.id,
+            `${buy.message}\n\n${
+              buy.tx
+                ? `Hash: <a href="${process.env.SOLSCAN_SCAN_URL}tx/${buy.tx}">${buy.tx}</a>`
+                : ``
+            }`,
+            { parse_mode: 'HTML' },
+          );
+        }
+        await this.sessionModel.deleteMany({ chatId: msg.chat.id });
+        return;
+      } else if (session.sellPostionAmount) {
+        const amount = msg.text.trim();
+        const sell = await this.tradeService.cashout(
+          `${msg.chat.id}`,
+          session.matchId,
+          session.sellPostionId,
+          +amount,
+          session.groupId ?? null,
+        );
+
+        if (sell) {
+          return await this.pulseBot.sendMessage(
+            msg.chat.id,
+            `${sell.message}\n\nHash: <a href="${process.env.SOLSCAN_SCAN_URL}tx/${sell.tx}">${sell.tx}</a>`,
+          );
+        }
+        await this.sessionModel.deleteMany({ chatId: msg.chat.id });
+        return;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   saveUser = async (chatId: string, username: string) => {
     try {
       const newSVMWallet = this.walletService.createSVMWallet();
@@ -388,6 +529,210 @@ export class PulsecastBotService {
       });
 
       return await newUser.save();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  handleGroupCommands = async (command, groupId) => {
+    this.logger.debug(command);
+    // let matchId: string;
+
+    // let parsedData;
+
+    const chatId = groupId;
+    // const messageId = query.message.message_id;
+
+    // function isJSON(str) {
+    //   try {
+    //     JSON.parse(str);
+    //     return true;
+    //   } catch (e) {
+    //     console.log(e);
+    //     return false;
+    //   }
+    // }
+
+    // function splitword(word) {
+    //   return word.split('_');
+    // }
+
+    // if (isJSON(query.data)) {
+    //   command = JSON.parse(query.data).command;
+    //   //   userChatId = JSON.parse(query.data).userChatId;
+    //   action = JSON.parse(query.data).action;
+    //   leagueId = JSON.parse(query.data).id;
+    //   matchId = JSON.parse(query.data).mId;
+    // } else {
+    //   command = query.data;
+    // }
+
+    try {
+      // const user = await this.userModel.findOne({ chatId: chatId });
+      // let session: SessionDocument;
+      // if (
+      //   !user ||
+      //   (!user.acceptedDiscalimer && command !== '/acceptDisclaimer')
+      // ) {
+      //   return await this.pulseBot.sendMessage(
+      //     chatId,
+      //     `Please click /start to setup your account.`,
+      //   );
+      // }
+      switch (command) {
+        case '/acceptDisclaimer':
+          await this.pulseBot.sendChatAction(chatId, 'typing');
+
+        // //TODO: MAKE USER ACCEPTDISCLAIMER AS TRUE
+        // await this.userModel.findOneAndUpdate(
+        //   { chatId: chatId },
+        //   {
+        //     acceptedDiscalimer: true,
+        //   },
+        //   { new: true }, // This ensures the updated document is returned
+        // );
+        // const allFeatures = await acceptedDisclaimerMessageMarkup(
+        //   user.svmWalletAddress,
+        // );
+        // if (allFeatures) {
+        //   const replyMarkup = { inline_keyboard: allFeatures.keyboard };
+        //   return await this.pulseBot.sendMessage(
+        //     chatId,
+        //     allFeatures.message,
+        //     {
+        //       parse_mode: 'HTML',
+        //       reply_markup: replyMarkup,
+        //     },
+        //   );
+        // }
+        // return;
+
+        case 'leagues':
+          await this.pulseBot.sendChatAction(chatId, 'typing');
+          await this.markupService.displayLeagues(chatId);
+          return;
+
+        // case '/nextLeaguePage':
+        //   //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+        //   if (action) {
+        //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        //     const [btnPage, identify] = splitword(action);
+        //     const changeDisplay = {
+        //       buttonPage: btnPage,
+        //       messageId: query.message.message_id,
+        //     };
+        //     await this.markupService.displayLeagues(
+        //       query.message.chat.id,
+        //       changeDisplay,
+        //     );
+        //     return;
+        //   }
+        //   return;
+
+        // case '/prevLeaguePage':
+        //   //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+        //   if (action) {
+        //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        //     const [btnPage, identify] = splitword(action);
+        //     const changeDisplay = {
+        //       buttonPage: btnPage,
+        //       messageId: query.message.message_id,
+        //     };
+
+        //     await this.markupService.displayLeagues(
+        //       query.message.chat.id,
+        //       changeDisplay,
+        //     );
+        //     return;
+        //   }
+        //   return;
+
+        // case '/leagueSelected':
+        //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+        //   await this.markupService.promptLeagueActions(chatId, leagueId);
+        //   return;
+
+        // case '/live':
+        // case '/liveMatches':
+        //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+        //   if (leagueId) {
+        //     await this.markupService.displayLeagueLiveMatches(chatId, leagueId);
+        //     return;
+        //   } else {
+        //     await this.markupService.displayAllLiveMatches(chatId);
+        //     return;
+        //   }
+
+        // case '/fixture':
+        //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+        //   if (leagueId) {
+        //     await this.markupService.displayLeagueFixtures(chatId, leagueId);
+        //     return;
+        //   } else {
+        //     await this.markupService.displayAllFixture(chatId);
+        //     return;
+        //   }
+
+        // case '/buyHome':
+        //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+        //   return await this.markupService.promptBuyAmount(
+        //     query.message.chat.id,
+        //     matchId,
+        //     user,
+        //     Outcome.HOME_WIN,
+        //   );
+
+        // case '/buyAway':
+        //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+        //   return await this.markupService.promptBuyAmount(
+        //     query.message.chat.id,
+        //     matchId,
+        //     user,
+        //     Outcome.AWAY_WIN,
+        //   );
+
+        // case '/buyDraw':
+        //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+        //   return await this.markupService.promptBuyAmount(
+        //     query.message.chat.id,
+        //     matchId,
+        //     user,
+        //     Outcome.DRAW,
+        //   );
+
+        // case '/Refresh':
+        //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+        //   if (leagueId) {
+        //     //TODO:REFRESH LEAGUE LIVE MATCH
+        //     return;
+        //   } else {
+        //     //TODO:REFRESH LEAGUE ALL LIVE MATCH
+        //     return;
+        //   }
+
+        // case '/close':
+        //   await this.pulseBot.sendChatAction(chatId, 'typing');
+        //   return await this.pulseBot.deleteMessage(
+        //     chatId,
+        //     query.message.message_id,
+        //   );
+
+        // case '/closeDelete':
+        //   await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
+        //   await this.sessionModel.deleteMany({
+        //     chatId: chatId,
+        //   });
+        //   return await this.pulseBot.deleteMessage(
+        //     query.message.chat.id,
+        //     query.message.message_id,
+        //   );
+
+        default:
+          return await this.pulseBot.sendMessage(
+            chatId,
+            `Processing command failed, please try again`,
+          );
+      }
     } catch (error) {
       console.log(error);
     }

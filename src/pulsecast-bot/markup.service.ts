@@ -476,7 +476,7 @@ export class MarkupService {
 
       await this.sessionModel.create({
         chatId: chatId,
-        buyPostionAmount: true,
+        buyPositionAmount: true,
         outcome,
         matchId,
       });

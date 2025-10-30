@@ -92,9 +92,11 @@ export class PulsecastBotService {
       }
 
       if (
-        (regexAmount.test(msg.text.trim()) && session.buyPostionAmount) ||
-        session.sellPostionAmount
+        session &&
+        regexAmount.test(msg.text.trim()) &&
+        (session.buyPositionAmount || session.sellPositionAmount)
       ) {
+        console.log('heree');
         // Handle text inputs if not a command
         return this.handleUserTextInputs(msg, session!);
       }
@@ -462,7 +464,7 @@ export class PulsecastBotService {
   ) => {
     await this.pulseBot.sendChatAction(msg.chat.id, 'typing');
     try {
-      if (session.buyPostionAmount) {
+      if (session && session.buyPositionAmount) {
         const amount = msg.text.trim();
 
         // console.log(session);
@@ -486,7 +488,7 @@ export class PulsecastBotService {
         }
         await this.sessionModel.deleteMany({ chatId: msg.chat.id });
         return;
-      } else if (session.sellPostionAmount) {
+      } else if (session && session.sellPositionAmount) {
         const amount = msg.text.trim();
         const sell = await this.tradeService.cashout(
           `${msg.chat.id}`,

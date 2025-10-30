@@ -27,10 +27,10 @@ export class Session {
   resetWallet: boolean;
 
   @Prop({ default: false })
-  sellPostionAmount: boolean;
+  sellPositionAmount: boolean;
 
   @Prop({ default: false })
-  buyPostionAmount: boolean;
+  buyPositionAmount: boolean;
 
   @Prop({ enum: Outcome })
   outcome: Outcome;

@@ -172,11 +172,7 @@ export class MarkupService {
           'Sorry There is no fixture for this league',
         );
       }
-      const leagueFixtureMarkup = await leaguefixtures(
-        leagueId,
-        fixtures,
-        chatId,
-      );
+      const leagueFixtureMarkup = await leaguefixtures(leagueId, fixtures);
       if (leagueFixtureMarkup) {
         const replyMarkup = {
           inline_keyboard: leagueFixtureMarkup.keyboard,

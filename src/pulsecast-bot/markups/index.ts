@@ -9,6 +9,7 @@ import { leaguefixtures } from './leagueFixtures';
 import { leagueLiveMatch } from './leagueLiveMatch';
 import { leagues } from './leagues';
 import { marketInterface } from './marketInterface';
+import { menuMarkup } from './menu';
 import { resetWalletWarningMarkup } from './resetWalletWarning';
 import { walletDetailsMarkup } from './walletDetails';
 import { welcomeMessageMarkup } from './welcome';
@@ -28,4 +29,5 @@ export {
   displayPrivateKeyMarkup,
   resetWalletWarningMarkup,
   marketInterface,
+  menuMarkup,
 };

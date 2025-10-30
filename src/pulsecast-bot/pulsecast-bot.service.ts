@@ -3,6 +3,7 @@ import * as TelegramBot from 'node-telegram-bot-api';
 import { HttpService } from '@nestjs/axios';
 import {
   acceptedDisclaimerMessageMarkup,
+  menuMarkup,
   welcomeMessageMarkup,
 } from './markups';
 import { MarkupService } from './markup.service';
@@ -124,6 +125,17 @@ export class PulsecastBotService {
             'There was an error saving your data, Please click the button below to try again.\n\nclick on /start',
           );
         }
+      }
+      if (command === '/menu' && msg.chat.type === 'private') {
+        const menu = await menuMarkup();
+        const replyMarkup = { inline_keyboard: menu.keyboard };
+
+        await this.pulseBot.sendChatAction(msg.chat.id, 'typing');
+
+        await this.pulseBot.sendMessage(msg.chat.id, menu.message, {
+          parse_mode: 'HTML',
+          reply_markup: replyMarkup,
+        });
       }
     } catch (error) {
       console.error(error);

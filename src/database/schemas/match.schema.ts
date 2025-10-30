@@ -18,6 +18,7 @@ export enum MatchStatus {
 export type Team = {
   name: string;
   key: number;
+  init: string;
 };
 
 @Schema({ timestamps: true })

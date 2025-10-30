@@ -115,3 +115,11 @@ export const parseScore = (scoreStr: string) => {
   const [home, away] = scoreStr.split('-').map((s) => Number(s.trim()));
   return { homeScore: home, awayScore: away };
 };
+
+export const toAcronym = (teamName: string) => {
+  return teamName
+    .replace(/[\.\,\-]/g, '') // remove punctuation
+    .split(/\s+/) // split words
+    .map((word) => word[0].toUpperCase()) // take first letter uppercase
+    .join('');
+};

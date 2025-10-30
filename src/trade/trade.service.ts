@@ -41,6 +41,9 @@ export class TradeService {
     let entryProbability;
     let tx = null;
     let user;
+    // let homeTeamAKA;
+    // let awayTeamAKA;
+    // let shareAKA;
 
     // console.log(matchId);
     // return;
@@ -82,6 +85,9 @@ export class TradeService {
 
     // Shares = stake / price
     const shares = stake / pricePerShare;
+
+    // homeTeamAKA = toAcronym(match.event_home_team);
+    // awayTeamAKA = toAcronym(match.event_away_team);
 
     const session = await this.connection.startSession();
     session.startTransaction();

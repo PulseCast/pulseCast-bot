@@ -6,6 +6,8 @@ import {
   allLiveMatch,
   displayPrivateKeyMarkup,
   displayUserPositions,
+  eventDetailInterface,
+  eventInterface,
   exportWalletWarningMarkup,
   leagueAction,
   leaguefixtures,
@@ -25,6 +27,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Outcome, Session } from 'src/database/schemas/session.schema';
 import { Position } from 'src/database/schemas/position.schema';
 import { Match } from 'src/database/schemas/match.schema';
+import { Url } from 'src/database/schemas/url.schema';
 
 // type PopulatedPosition = Position & {
 //   market: Market;
@@ -45,6 +48,7 @@ export class MarkupService {
     @InjectModel(Match.name) private readonly matchModel: Model<Match>,
     @InjectModel(Session.name) private readonly sessionModel: Model<Session>,
     @InjectModel(Position.name) private positionModel: Model<Position>,
+    @InjectModel(Url.name) private urlModel: Model<Url>,
   ) {}
 
   displayLeagues = async (chatId: string, changeDisplay?: any) => {
@@ -649,4 +653,179 @@ export class MarkupService {
   //     totalPot,
   //   };
   // };
+
+  // async captureMarketMedia(
+  //   chatId: string,
+  //   url: string,
+  //   ticker: string,
+  // ): Promise<Buffer> {
+  //   const kalshiResponse = await this.httpService.axiosRef.get(
+  //     `https://api.elections.kalshi.com/trade-api/v2/events/${ticker}`,
+  //   );
+  //   const eventData = kalshiResponse.data;
+  //   const response = await this.httpService.axiosRef.get(
+  //     ` https://api.screenshotmachine.com/?key=${process.env.SCREENSHOT_KEY}&url=${encodeURIComponent(url)}&dimension=1024x988`,
+  //     { responseType: 'arraybuffer' },
+  //   );
+  //   const screenshot = response.data;
+
+  //   const eventPayload = {
+  //     eventTicker: eventData.event.event_ticker,
+  //     title: eventData.event.title,
+  //     subTitle: eventData.event.sub_title,
+  //     secondaryRule: eventData.markets[0].rules_secondary,
+  //     eventStatus: eventData.markets[0].status,
+  //   };
+
+  //   const event = eventInterface(eventPayload);
+
+  //   if (event) {
+  //     const replyMarkup = {
+  //       inline_keyboard: event.keyboard,
+  //     };
+  //     await this.pulseBotService.pulseBot.sendPhoto(
+  //       chatId,
+  //       Buffer.from(screenshot),
+  //     );
+  //     await this.pulseBotService.pulseBot.sendMessage(chatId, event.message, {
+  //       parse_mode: 'HTML',
+  //       reply_markup: replyMarkup,
+  //     });
+
+  //     return;
+  //   }
+
+  //   return;
+  // }
+
+  async captureMarketMedia(
+    chatId: string,
+    url: string,
+    ticker: string,
+  ): Promise<void> {
+    try {
+      console.log('hereeeee');
+      await this.urlModel.create({ ticker, url });
+
+      // Run the 2 API calls in parallel for speed
+      const [kalshiResponse, screenshotResponse] = await Promise.all([
+        this.httpService.axiosRef.get(
+          `https://api.elections.kalshi.com/trade-api/v2/events/${ticker}`,
+        ),
+        this.httpService.axiosRef.get(
+          `https://api.screenshotmachine.com/?key=${process.env.SCREENSHOT_KEY}&url=${encodeURIComponent(
+            url,
+          )}&dimension=1024x988`,
+          { responseType: 'arraybuffer' },
+        ),
+      ]);
+
+      const eventData = kalshiResponse.data;
+      const screenshotBuffer = Buffer.from(screenshotResponse.data);
+
+      // Build event payload
+      const eventPayload = {
+        eventTicker: eventData.event.event_ticker,
+        title: eventData.event.title,
+        subTitle: eventData.event.sub_title,
+        secondaryRule: eventData.markets[0].rules_secondary,
+        eventStatus: eventData.markets[0].status,
+      };
+
+      const event = eventInterface(eventPayload);
+      if (!event) return;
+
+      // Prepare Telegram keyboard
+      const replyMarkup = { inline_keyboard: event.keyboard };
+
+      await this.pulseBotService.pulseBot.sendPhoto(chatId, screenshotBuffer, {
+        caption: event.message,
+        reply_markup: replyMarkup,
+        parse_mode: 'HTML',
+      });
+
+      // await this.pulseBotService.pulseBot.sendMessage(chatId, event.message, {
+      //   parse_mode: 'HTML',
+      //   reply_markup: replyMarkup,
+      // });
+
+      return;
+    } catch (error) {
+      console.error('Error capturing market media:', error);
+      // Optional: send fallback message
+      // await this.pulseBotService.pulseBot.sendMessage(chatId, 'Error loading market data.');
+    }
+  }
+
+  async diplayEventTradeDetails(chatId: string, ticker: string): Promise<void> {
+    try {
+      const { url } = await this.urlModel.findOne({ ticker });
+      // Run the 2 API calls in parallel for speed
+      const [kalshiResponse, screenshotResponse] = await Promise.all([
+        this.httpService.axiosRef.get(
+          `https://api.elections.kalshi.com/trade-api/v2/events/${ticker}`,
+        ),
+        this.httpService.axiosRef.get(
+          `https://api.screenshotmachine.com/?key=${process.env.SCREENSHOT_KEY}&url=${encodeURIComponent(
+            url,
+          )}&dimension=1024x988`,
+          { responseType: 'arraybuffer' },
+        ),
+      ]);
+
+      const eventData = kalshiResponse.data;
+      const screenshotBuffer = Buffer.from(screenshotResponse.data);
+
+      // Build event payload
+      const eventPayload = {
+        eventTicker: eventData.event.event_ticker,
+        title: eventData.event.title,
+        subTitle: eventData.event.sub_title,
+        secondaryRule: eventData.markets[0].rules_secondary,
+        eventStatus: eventData.markets[0].status,
+        market1: {
+          yes_sub_title: eventData.markets[0].yes_sub_title,
+          yes_ask: eventData.markets[0].yes_ask,
+          no_ask: eventData.markets[0].no_ask,
+        },
+        market2: {
+          yes_sub_title: eventData.markets[1].yes_sub_title,
+          yes_ask: eventData.markets[1].yes_ask,
+          no_ask: eventData.markets[1].no_ask,
+        },
+        market3: {
+          yes_sub_title: eventData.markets[2].yes_sub_title,
+          yes_ask: eventData.markets[2].yes_ask,
+          no_ask: eventData.markets[2].no_ask,
+        },
+        volume:
+          Number(eventData.markets[0].volume) +
+          Number(eventData.markets[1].volume) +
+          Number(eventData.markets[2].volume),
+      };
+
+      const event = eventDetailInterface(eventPayload);
+      if (!event) return;
+
+      // Prepare Telegram keyboard
+      const replyMarkup = { inline_keyboard: event.keyboard };
+
+      await this.pulseBotService.pulseBot.sendPhoto(chatId, screenshotBuffer, {
+        caption: event.message,
+        reply_markup: replyMarkup,
+        parse_mode: 'HTML',
+      });
+
+      // await this.pulseBotService.pulseBot.sendMessage(chatId, event.message, {
+      //   parse_mode: 'HTML',
+      //   reply_markup: replyMarkup,
+      // });
+
+      return;
+    } catch (error) {
+      console.error('Error capturing market media:', error);
+      // Optional: send fallback message
+      // await this.pulseBotService.pulseBot.sendMessage(chatId, 'Error loading market data.');
+    }
+  }
 }

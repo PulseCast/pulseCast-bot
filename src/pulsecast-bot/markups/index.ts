@@ -4,6 +4,8 @@ import { allLiveMatch } from './allLiveMatches';
 import { marketCategories } from './categories';
 import { displayUserPositions } from './displayPositions';
 import { displayPrivateKeyMarkup } from './displayPrivateKey';
+import { eventInterface } from './event';
+import { eventDetailInterface } from './eventDetails';
 import { exportWalletWarningMarkup } from './exportWalletWarning';
 import { leagueAction } from './leagueAction';
 import { leaguefixtures } from './leagueFixtures';
@@ -32,4 +34,6 @@ export {
   marketInterface,
   menuMarkup,
   displayUserPositions,
+  eventInterface,
+  eventDetailInterface,
 };

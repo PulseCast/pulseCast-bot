@@ -64,12 +64,43 @@ export class PulsecastBotService {
 
       const regexGroup =
         /^(?:@Pulse_predict_bot|@allbotTestsbot)\s*\/([a-zA-Z0-9_]+)(?:\s+(.*))?$/;
+
       const matchGroup = msg.text.trim().match(regexGroup);
       const regexAmount = /^\d+(\.\d+)?$/;
       const regexBet = /\/start\s+bet_([a-zA-Z0-9]+)/;
       const regexsell = /\/start\s+sell_([a-zA-Z0-9]+)/;
+      // const regexTrade = /\/start\s+trade_([a-zA-Z0-9]+)/;
+      const regexTrade = /\/start\s+trade_([a-zA-Z0-9-]+)/;
       const matchBet = msg.text.trim().match(regexBet);
       const matchsell = msg.text.trim().match(regexsell);
+      const matchTrade = msg.text.trim().match(regexTrade);
+
+      const regexKalshi = /^https:\/\/kalshi\.com\/.*\/([^\/]+)$/;
+      const matchKalshi = msg.text.trim().match(regexKalshi);
+      const slug = matchKalshi ? matchKalshi[1].toUpperCase() : null;
+
+      if (matchKalshi) {
+        console.log(slug);
+
+        return await this.markupService.captureMarketMedia(
+          msg.chat.id,
+          msg.text.trim(),
+          slug,
+        );
+
+        // if (msg.chat.type !== 'private') {
+        //   return await this.markupService.displayMarketInterface(
+        //     msg.chat.id,
+        //     matchBet[1],
+        //     true,
+        //   );
+        // } else {
+        //   return await this.markupService.displayMarketInterface(
+        //     msg.chat.id,
+        //     matchBet[1],
+        //   );
+        // }
+      }
 
       if (msg.chat.type !== 'private' && matchGroup) {
         const command = matchGroup[1];
@@ -97,6 +128,17 @@ export class PulsecastBotService {
       if (matchsell) {
         await this.pulseBot.sendChatAction(msg.chat.id, 'typing');
         return await this.markupService.promptSellAmount(msg.chat.id);
+      }
+
+      if (matchTrade) {
+        await this.pulseBot.deleteMessage(msg.chat.id, msg.message_id);
+        await this.pulseBot.sendChatAction(msg.chat.id, 'typing');
+        const ticker = matchTrade[1]; // ← this is the part after trade_
+
+        return await this.markupService.diplayEventTradeDetails(
+          msg.chat.id,
+          ticker,
+        );
       }
 
       if (
@@ -203,6 +245,9 @@ export class PulsecastBotService {
       }
 
       switch (command) {
+        case '/':
+          return;
+
         case '/acceptDisclaimer':
           await this.pulseBot.sendChatAction(query.message.chat.id, 'typing');
 
